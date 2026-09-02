@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARVULI - Gestão de Membros</title>
+    <style>
+        /* Variáveis baseadas no Dashboard */
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #8b0000; 
+            --text-main: #333333;
+            --text-muted: #777777;
+            --border-color: #dddddd;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); }
+
+        /* Cabeçalho com botão de voltar */
+        header { background-color: var(--primary); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; }
+        .btn-voltar { color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold; }
+        header h1 { font-size: 1.2rem; margin: 0 auto; padding-right: 20px; }
+
+        main { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Estilo dos Botões */
+        .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; }
+        .btn-small { padding: 8px 12px; font-size: 0.85rem; width: auto; }
+        .btn-secondary { background-color: #6c757d; }
+
+        /* Lista de Membros */
+        .card-membro { background-color: var(--card-bg); border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .membro-info h3 { font-size: 1.05rem; margin-bottom: 3px; }
+        .membro-info p { font-size: 0.85rem; color: var(--text-muted); }
+        .badge { background-color: #e2e3e5; color: #383d41; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+        /* Modal do Formulário */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        
+        /* Formulários */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        
+        /* Input Group para o Telefone */
+        .input-group { display: flex; gap: 8px; align-items: center; }
+        .prefixo-tel { flex: 0 0 60px; background-color: #ffffff; color: var(--text-main); text-align: center; border: 1px solid var(--border-color); border-radius: 6px; }
+        .input-group input:not(.prefixo-tel) { flex: 1 1 auto; }
+
+        /* Campos de formulário com fundo branco consistente */
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background-color: #ffffff; color: var(--text-main); }
+
+        .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="../dashboard/dashboard.html" class="btn-voltar">←</a>
+        <h1>Gestão de Membros</h1>
+    </header>
+
+    <main>
+        <button class="btn" onclick="abrirModal()">+ Novo Membro</button>
+        
+        <!-- A lista de membros será gerada pelo JavaScript aqui -->
+        <div id="lista-membros"></div>
+    </main>
+
+    <!-- Modal de Criação / Edição -->
+    <div class="modal-overlay" id="modalMembro">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-titulo">Novo Membro</h2>
+                <span style="font-size: 1.5rem; cursor: pointer;" onclick="fecharModal()">&times;</span>
+            </div>
+            
+            <form id="formMembro" onsubmit="salvarMembro(event)">
+                <input type="hidden" id="membroId">
+                
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone (WhatsApp)</label>
+                                    <div class="input-group">
+                                    <input type="text" id="ddi" class="form-control prefixo-tel" value="+55" placeholder="+55" aria-label="DDI">
+                                    <input type="text" id="ddd" class="form-control prefixo-tel" value="61" placeholder="61" aria-label="DDD">
+                                    <input type="tel" id="telefone" class="form-control" placeholder="90000-0000" pattern="[0-9]{5}-[0-9]{4}" required>
+                                </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataNascimento">Data de Nascimento</label>
+                    <input type="date" id="dataNascimento" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="grau">Grau</label>
+                    <select id="grau" class="form-control" required>
+                        <option value="Membro">Membro</option>
+                        <option value="Coordenação">Coordenação</option>
+                        <option value="Administração">Administração</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="funcao">Função Litúrgica</label>
+                    <select id="funcao" class="form-control" required>
+                        <option value="Acólito">Acólito</option>
+                        <option value="Cerimoniário Mor">Cerimoniário Mor</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simulando um retorno do Banco de Dados (telefone já inclui DDI e DDD)
+        let membrosDB = [
+            { id: 1, nome: "João Silva", telefone: "+55 61 98888-7777", nascimento: "2000-05-15", grau: "Membro", funcao: "Acólito" },
+            { id: 2, nome: "Pedro Alves", telefone: "+55 61 99999-1111", nascimento: "1998-10-22", grau: "Coordenação", funcao: "Cerimoniário Mor" }
+        ];
+
+        function renderizarLista() {
+            const container = document.getElementById('lista-membros');
+            container.innerHTML = ''; // Limpa a lista atual
+
+            membrosDB.forEach(membro => {
+                const card = document.createElement('div');
+                card.className = 'card-membro';
+                card.innerHTML = `
+                    <div class="membro-info">
+                        <h3>${membro.nome}</h3>
+                            <p>📞 ${membro.telefone}</p>
+                        <p><span class="badge">${membro.grau}</span> - ${membro.funcao}</p>
+                    </div>
+                    <button class="btn btn-small" onclick="editarMembro(${membro.id})">Editar</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function abrirModal() {
+            document.getElementById('formMembro').reset();
+            document.getElementById('membroId').value = '';
+            document.getElementById('modal-titulo').innerText = 'Novo Membro';
+            // Sugestões editáveis
+            document.getElementById('ddi').value = '+55';
+            document.getElementById('ddd').value = '61';
+            document.getElementById('modalMembro').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalMembro').style.display = 'none';
+        }
+
+        function editarMembro(id) {
+            const membro = membrosDB.find(m => m.id === id);
+            if (membro) {
+                document.getElementById('membroId').value = membro.id;
+                document.getElementById('nome').value = membro.nome;
+                // Tenta separar DDI, DDD e número caso estejam juntos
+                let ddiVal = '+55', dddVal = '61', telVal = membro.telefone;
+                if (membro.telefone) {
+                    const parts = membro.telefone.split(/\s+/);
+                    if (parts.length >= 3) {
+                        ddiVal = parts[0];
+                        dddVal = parts[1];
+                        telVal = parts.slice(2).join(' ');
+                    } else {
+                        // se não tiver DDI/DDD, mantém o telefone como está
+                        telVal = membro.telefone;
+                    }
+                }
+                document.getElementById('ddi').value = ddiVal;
+                document.getElementById('ddd').value = dddVal;
+                document.getElementById('telefone').value = telVal;
+                document.getElementById('dataNascimento').value = membro.nascimento;
+                document.getElementById('grau').value = membro.grau;
+                document.getElementById('funcao').value = membro.funcao;
+                
+                document.getElementById('modal-titulo').innerText = 'Editar Membro';
+                document.getElementById('modalMembro').style.display = 'flex';
+            }
+        }
+
+        function salvarMembro(event) {
+            event.preventDefault(); // Impede o recarregamento da página
+
+            const idAtual = document.getElementById('membroId').value;
+            const ddiVal = document.getElementById('ddi').value.trim() || '+55';
+            const dddVal = document.getElementById('ddd').value.trim() || '61';
+            const telVal = document.getElementById('telefone').value.trim();
+
+            const novoMembro = {
+                id: idAtual ? parseInt(idAtual) : Date.now(), // Gera um ID se for novo
+                nome: document.getElementById('nome').value,
+                telefone: `${ddiVal} ${dddVal} ${telVal}`,
+                nascimento: document.getElementById('dataNascimento').value,
+                grau: document.getElementById('grau').value,
+                funcao: document.getElementById('funcao').value
+            };
+
+            if (idAtual) {
+                // Atualiza existente
+                const index = membrosDB.findIndex(m => m.id == idAtual);
+                membrosDB[index] = novoMembro;
+            } else {
+                // Insere novo
+                membrosDB.push(novoMembro);
+            }
+
+            fecharModal();
+            renderizarLista();
+            
+            // Aqui, no futuro, você fará um fetch() ou axios.post() para enviar o 'novoMembro' ao seu Node.js
+        }
+
+        // Carrega a lista ao abrir a tela
+        window.onload = renderizarLista;
+
+        // Formata o campo de telefone enquanto o usuário digita: 90000-0000
+        const telefoneInput = document.getElementById('telefone');
+        function formatTelefoneInput(e) {
+            const el = e.target;
+            const cursorPos = el.selectionStart;
+            let digits = el.value.replace(/\D/g, '');
+            if (digits.length > 9) digits = digits.slice(0, 9);
+            if (digits.length > 5) {
+                el.value = digits.slice(0,5) + '-' + digits.slice(5);
+            } else {
+                el.value = digits;
+            }
+            // move caret to end for simplicity
+            el.selectionStart = el.selectionEnd = el.value.length;
+        }
+        telefoneInput.addEventListener('input', formatTelefoneInput);
+        telefoneInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = paste.replace(/\D/g, '').slice(0,9);
+            if (digits.length > 5) {
+                this.value = digits.slice(0,5) + '-' + digits.slice(5);
+            } else {
+                this.value = digits;
+            }
+        });
+    </script>
+</body>
+</html>

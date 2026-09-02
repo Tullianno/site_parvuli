@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARVULI - Dashboard</title>
+    <style>
+        /* Variáveis de Cores e Estilo Básico (Mobile-First) */
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #8b0000; /* Vermelho litúrgico */
+            --text-main: #333333;
+            --text-muted: #777777;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+
+        /* Cabeçalho */
+        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; }
+        header h1 { font-size: 1.2rem; }
+        header p { font-size: 0.9rem; opacity: 0.8; }
+
+        /* Container Principal */
+        main { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Estilo dos Cartões (Cards) */
+        .card { background-color: var(--card-bg); border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 1rem; color: var(--text-muted); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        .destaque { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
+        .saldo { font-size: 1.5rem; font-weight: bold; color: var(--success); }
+
+        /* Botões */
+        .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; margin-bottom: 10px; }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        
+        /* Grid para Menus Admin */
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .admin-grid .btn { font-size: 0.85rem; padding: 15px 5px; }
+
+        /* Classe para ocultar elementos baseados no Nível de Acesso */
+        .nivel-2-only { display: none; }
+
+        /* Barra de Navegação Inferior */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PARVULI</h1>
+        <p id="saudacao-usuario">Olá, João (Acólito)</p>
+    </header>
+
+    <main>
+        <!-- Visível para Nível 1 e 2 -->
+        <div class="card">
+            <h2>Próxima Missa</h2>
+            <p>15 de Outubro - Domingo, 19:00</p>
+            <p class="destaque">Função: Turíbulo</p>
+        </div>
+
+        <div class="card">
+            <h2>Ações Rápidas</h2>
+            <button class="btn">Preencher Disponibilidade</button>
+            <button class="btn btn-outline nivel-2-only">Gerar Escalas do Mês</button>
+        </div>
+
+        <div class="card">
+            <h2>Resumo Financeiro</h2>
+            <p>Saldo Atual do Grupo</p>
+            <p class="saldo">R$ 345,50</p>
+        </div>
+
+        <!-- Exclusivo para Nível 2 (Coordenação) -->
+        <div class="card nivel-2-only" style="border-left: 4px solid var(--warning);">
+            <h2>Avisos da Coordenação</h2>
+            <p><strong>Faltam preencher disponibilidade:</strong><br> Marcos, Pedro, Tiago.</p>
+        </div>
+
+        <div class="card nivel-2-only">
+            <h2>Painel de Gestão</h2>
+            <div class="admin-grid">
+                <button class="btn btn-outline">👤 Gerir Membros</button>
+                <button class="btn btn-outline">💰 Editar Caixa</button>
+                <button class="btn btn-outline">📊 Ver Frequência</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active">Início</a>
+        <a href="#" class="nav-item">Escalas</a>
+        <a href="#" class="nav-item">Perfil</a>
+    </nav>
+
+    <script>
+        // Simulador de Login - Mude este valor para testar
+        // 1 = Acólito Comum | 2 = Coordenador/Admin
+        const nivelUsuario = 2; 
+
+        function configurarPainel() {
+            const adminElements = document.querySelectorAll('.nivel-2-only');
+            const saudacao = document.getElementById('saudacao-usuario');
+
+            if (nivelUsuario === 2) {
+                // Mostra as ferramentas de coordenação
+                adminElements.forEach(el => el.style.display = 'block');
+                saudacao.innerText = "Olá, Coordenador(a)";
+            } else {
+                // Garante que ferramentas de coordenação fiquem ocultas
+                adminElements.forEach(el => el.style.display = 'none');
+                saudacao.innerText = "Olá, Acólito";
+            }
+        }
+
+        // Executa a verificação ao carregar a página
+        window.onload = configurarPainel;
+    </script>
+</body>
+</html>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escala Solene - PARVULI</title>
+    <!-- Biblioteca html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -14,227 +16,61 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body {
-            background-color: var(--bg-color);
-            padding: 12px;
-            padding-bottom: 72px;
-        }
+        body { background-color: var(--bg-color); padding: 12px; padding-bottom: 72px; }
 
-        .header-nav {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+        .controles-topo { background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; }
+        .ferramentas-exportacao { display: flex; align-items: center; gap: 10px; }
+        .ferramentas-exportacao label { font-weight: bold; font-size: 0.9rem; }
+        .btn-exportar { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-        .btn-voltar {
-            text-decoration: none;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--primary);
-            background: var(--card-bg);
-            padding: 8px 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            display: inline-block;
-        }
+        .header-nav { display: flex; align-items: center; margin-bottom: 12px; }
+        .btn-voltar { text-decoration: none; font-size: 1rem; font-weight: 700; color: var(--primary); background: var(--card-bg); padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); display: inline-block; }
 
-        .escala-container {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        }
+        .escala-container { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+        .solene-topo { border: 2px dashed var(--primary); background-color: var(--accent-solene); padding: 14px 12px; text-align: center; border-radius: 8px; margin-bottom: 14px; }
+        .solene-topo h2 { font-size: 1.05rem; text-transform: uppercase; margin-bottom: 6px; color: #856404; }
+        .solene-topo p { font-size: 0.95rem; font-weight: 700; }
 
-        /* Cabeçalho da Solenidade */
-        .solene-topo {
-            border: 2px dashed var(--primary);
-            background-color: var(--accent-solene);
-            padding: 14px 12px;
-            text-align: center;
-            border-radius: 8px;
-            margin-bottom: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; border: 2px solid var(--border-color); table-layout: fixed; }
+        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: left; vertical-align: top; font-size: 0.85rem; }
+        th { background-color: #f0f0f0; text-align: center; font-size: 0.9rem; }
+        .coluna-funcao { width: 42%; font-weight: 700; background-color: #fafafa; }
+        .coluna-nomes { width: 58%; }
 
-        .solene-topo h2 {
-            font-size: 1.05rem;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            color: #856404;
-        }
+        .select-membro { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; }
+        
+        .painel-adicionais { margin-top: 18px; background: #fff; padding: 14px 12px; border-radius: 8px; border: 1px solid #ccc; }
+        .painel-adicionais h3 { font-size: 0.95rem; margin-bottom: 10px; }
+        .botoes-adicionais { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-        .solene-topo p {
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
+        .btn-base { border: none; border-radius: 6px; cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+        .btn-add { background: #28a745; color: white; padding: 8px 10px; font-size: 0.8rem; }
+        .btn-livre { background: #17a2b8; color: white; padding: 8px 10px; font-size: 0.8rem; }
+        
+        .acoes-funcao { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+        .grupo-setas { display: flex; gap: 2px; }
+        .btn-mover { background: transparent; color: #6c757d; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 0.75rem; padding: 4px 6px; transition: 0.2s; }
+        .btn-remover-funcao { background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.7rem; padding: 5px 8px; flex: 1; }
+        .btn-add-pessoa { background: #007bff; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.78rem; width: 100%; margin-top: 8px; }
+        .btn-remover-pessoa { background: #6c757d; color: white; border: none; border-radius: 4px; font-size: 0.72rem; padding: 6px 8px; cursor: pointer; width: 100%; }
 
-        /* Tabela da Solenidade */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 2px solid var(--border-color);
-            table-layout: fixed;
-        }
+        .lista-selects { display: flex; flex-direction: column; gap: 8px; }
+        .campo-pessoa { display: grid; grid-template-columns: 1fr; gap: 8px; align-items: center; }
 
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            text-align: left;
-            vertical-align: top;
-            font-size: 0.85rem;
-        }
-
-        th {
-            background-color: #f0f0f0;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .coluna-funcao {
-            width: 42%;
-            font-weight: 700;
-            background-color: #fafafa;
-        }
-
-        .coluna-nomes {
-            width: 58%;
-        }
-
-        .select-membro {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        /* Painel de Adicionar Funções Opcionais */
-        .painel-adicionais {
-            margin-top: 18px;
-            background: #fff;
-            padding: 14px 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .painel-adicionais h3 {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-        }
-
-        .botoes-adicionais {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-
-        /* Botões Gerais */
-        .btn-base {
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.2s ease;
-        }
-
-        .btn-add {
-            background: #28a745;
-            color: white;
-            padding: 8px 10px;
-            font-size: 0.8rem;
-        }
-        .btn-add:hover { background: #218838; }
-
-        .btn-livre {
-            background: #17a2b8;
-            color: white;
-            padding: 8px 10px;
-            font-size: 0.8rem;
-        }
-        .btn-livre:hover { background: #138496; }
-
-        .acoes-funcao {
-            display: flex;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .btn-mover,
-        .btn-remover-funcao {
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.7rem;
-            padding: 5px 8px;
-            width: 100%;
-        }
-
-        .btn-mover {
-            background: #6f42c1;
-        }
-
-        .btn-remover-funcao {
-            background: #dc3545;
-        }
-
-        .btn-add-pessoa {
-            background: #007bff;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.78rem;
-            width: 100%;
-            margin-top: 8px;
-        }
-        .btn-add-pessoa:hover { background: #0056b3; }
-
-        .btn-remover-pessoa {
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.72rem;
-            padding: 6px 8px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn-remover-pessoa:hover { background: #545b62; }
-
-        .lista-selects {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .campo-pessoa {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            align-items: center;
-        }
+        /* --- CLASSE MÁGICA PARA A FOTO --- */
+        .modo-exportacao { box-shadow: none !important; border-radius: 0 !important; }
+        .modo-exportacao .acoes-funcao, 
+        .modo-exportacao .btn-add-pessoa, 
+        .modo-exportacao .btn-remover-pessoa { display: none !important; }
+        /* Transforma o visual de dropdown (select) para parecer texto puro na imagem */
+        .modo-exportacao .select-membro { appearance: none; -webkit-appearance: none; border: none !important; background: transparent !important; padding: 0 !important; font-weight: bold; color: #333; }
 
         @media (min-width: 768px) {
-            body {
-                padding: 16px;
-            }
-
-            .escala-container {
-                padding: 16px;
-            }
-
-            .botoes-adicionais {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-
-            .campo-pessoa {
-                grid-template-columns: 1fr auto;
-            }
-
-            .btn-remover-pessoa {
-                width: auto;
-                min-width: 90px;
-            }
+            body { padding: 16px; }
+            .escala-container { padding: 16px; }
+            .botoes-adicionais { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .campo-pessoa { grid-template-columns: 1fr auto; }
+            .btn-remover-pessoa { width: auto; min-width: 90px; }
         }
     </style>
 </head>
@@ -244,10 +80,19 @@
         <a href="escala.html" class="btn-voltar">← Voltar à Escala Mensal</a>
     </div>
 
-    <main class="escala-container">
+    <!-- Controles Superiores -->
+    <div class="controles-topo">
+        <div class="ferramentas-exportacao">
+            <label for="cor-fundo">Fundo da Imagem:</label>
+            <input type="color" id="cor-fundo" value="#ffffff">
+            <button class="btn-exportar" onclick="baixarImagem()">📸 Salvar Imagem</button>
+        </div>
+    </div>
+
+    <main class="escala-container" id="area-escala">
         
         <div class="solene-topo">
-            <h2 id="liturgia-texto">18º Domingo do Tempo Comum</h2>
+            <h2 id="liturgia-texto">Domingo do Tempo Comum</h2>
             <p id="data-hora-texto">Domingo (06/09) - 10:00</p>
         </div>
 
@@ -263,33 +108,26 @@
             </tbody>
         </table>
 
-        <!-- Painel para adicionar funções extras e readicionar removidas -->
-        <div class="painel-adicionais">
-            <h3>Adicionar Funções à Escala</h3>
-            <div class="botoes-adicionais">
-                <!-- Funções Principais -->
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Mor', 1, false, true, false)">+ Mor</button>
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Cruz e leituras', 1)">+ Cruz e leituras</button>
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Turíbulo', 1)">+ Turíbulo</button>
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Naveta', 1)">+ Naveta</button>
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Velas', 2, false, false, true)">+ Velas</button>
-                
-                <!-- Funções Especiais -->
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Missal', 1)">+ Missal</button>
-                <button class="btn-base btn-add" onclick="adicionarMitraBaculo()">+ Mitra e Báculo</button>
-                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Palio', 4)">+ Pálio (4 pessoas)</button>
-                
-                <!-- Funções com múltiplas pessoas -->
-                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Leituras', 1, false, false, true)">+ Leituras</button>
-                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Apoio', 1, false, false, true)">+ Apoio</button>
-                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Matracas', 1, false, false, true)">+ Matracas</button>
-            </div>
-        </div>
-
     </main>
 
+    <div class="painel-adicionais">
+        <h3>Adicionar Funções à Escala</h3>
+        <div class="botoes-adicionais">
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Mor', 1, false, true, false)">+ Mor</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Cruz e leituras', 1)">+ Cruz e leituras</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Turíbulo', 1)">+ Turíbulo</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Naveta', 1)">+ Naveta</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Velas', 2, false, false, true)">+ Velas</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Missal', 1)">+ Missal</button>
+            <button class="btn-base btn-add" onclick="adicionarMitraBaculo()">+ Mitra e Báculo</button>
+            <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Palio', 4)">+ Pálio (4 pessoas)</button>
+            <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Leituras', 1, false, false, true)">+ Leituras</button>
+            <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Apoio', 1, false, false, true)">+ Apoio</button>
+            <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Matracas', 1, false, false, true)">+ Matracas</button>
+        </div>
+    </div>
+
     <script>
-        // Banco simulado de membros
         const membrosGeral = [
             { id: 1, nome: "Túlio Rocha", funcaoGrupo: "Cerimoniário Mor" },
             { id: 2, nome: "Pedro Alves", funcaoGrupo: "Cerimoniário Mor" },
@@ -298,7 +136,13 @@
             { id: 5, nome: "Mateus", funcaoGrupo: "Acólito" }
         ];
 
-        // Todas as funções agora são tratadas como editáveis. Aqui definimos as que já vêm preenchidas.
+        // Simulador de Banco de Dados de contagem por pessoa e por função na Missa Solene
+        const historicoSolene = {
+            1: { "Mor": 3, "Turíbulo": 1 },  // Túlio foi Mor 3 vezes
+            2: { "Mor": 5 },                 // Pedro foi Mor 5 vezes
+            3: { "Velas": 4, "Naveta": 1 }   // Gigi
+        };
+
         const funcoesIniciais = [
             { nome: "Mor", qtd: 1, restritoMor: true, permiteMais: false, removivel: false },
             { nome: "Cruz e leituras", qtd: 1, restritoMor: false, permiteMais: false, removivel: false },
@@ -318,7 +162,6 @@
                 const [ano, mes, dia] = dataParte.split('-');
                 const dataObj = new Date(ano, mes - 1, dia);
                 const diaSemanaTexto = dataObj.getDay() === 0 ? "Domingo" : "Sábado";
-                
                 document.getElementById('data-hora-texto').innerText = `${diaSemanaTexto} (${dia}/${mes}) - ${hora}`;
             }
 
@@ -335,6 +178,8 @@
                 let idUnico = 'linha_' + f.nome.replace(/\s+/g, '');
                 criarLinhaTabela(f.nome, f.qtd, f.restritoMor, idUnico, f.permiteMais, true);
             });
+            
+            atualizarDisponibilidadeMembros();
         }
 
         function criarLinhaTabela(nomeFuncao, quantidade, restritoMor, idLinha, permiteMaisPessoas, removivel = true) {
@@ -345,20 +190,22 @@
             let htmlFuncao = `${nomeFuncao}`;
             htmlFuncao += `
                 <div class="acoes-funcao">
-                    <button class="btn-mover btn-base" onclick="moverFuncao('${idLinha}', 'up')" title="Subir função">↑</button>
-                    <button class="btn-mover btn-base" onclick="moverFuncao('${idLinha}', 'down')" title="Descer função">↓</button>
+                    <div class="grupo-setas">
+                        <button class="btn-mover" onclick="moverFuncao('${idLinha}', 'up')" title="Subir função">▲</button>
+                        <button class="btn-mover" onclick="moverFuncao('${idLinha}', 'down')" title="Descer função">▼</button>
+                    </div>
                     <button class="btn-remover-funcao btn-base" onclick="removerFuncao('${idLinha}', '${nomeFuncao}')">Remover</button>
                 </div>
             `;
 
             let htmlSelects = `<div id="selects_${idLinha}" class="lista-selects">`;
             for (let i = 0; i < quantidade; i++) {
-                htmlSelects += gerarSelectMembros(restritoMor, idLinha, permiteMaisPessoas, false);
+                htmlSelects += gerarSelectMembros(restritoMor, idLinha, permiteMaisPessoas, false, nomeFuncao);
             }
             htmlSelects += `</div>`;
 
             if (permiteMaisPessoas) {
-                htmlSelects += `<button type="button" class="btn-add-pessoa btn-base" onclick="adicionarPessoaNaFuncao('${idLinha}', ${restritoMor})">+ Nome</button>`;
+                htmlSelects += `<button type="button" class="btn-add-pessoa btn-base" onclick="adicionarPessoaNaFuncao('${idLinha}', ${restritoMor}, '${nomeFuncao}')">+ Nome</button>`;
             }
 
             tr.innerHTML = `
@@ -368,15 +215,24 @@
             tbody.appendChild(tr);
         }
 
-        function gerarSelectMembros(apenasCerimoniarioMor, idLinha = null, permiteMaisPessoas = false, ehAdicional = false) {
+        // Função ajustada para processar e imprimir o contador do histórico
+        function gerarSelectMembros(apenasCerimoniarioMor, idLinha = null, permiteMaisPessoas = false, ehAdicional = false, nomeFuncao = "") {
             let options = '<option value="">Selecione o membro...</option>';
             
             membrosGeral.forEach(m => {
                 if (apenasCerimoniarioMor && m.funcaoGrupo !== "Cerimoniário Mor") return; 
-                options += `<option value="${m.id}">${m.nome} (${m.funcaoGrupo})</option>`;
+                
+                // Busca no banco simulado quantas vezes o membro fez esta função
+                let vezesNaFuncao = 0;
+                if(historicoSolene[m.id] && historicoSolene[m.id][nomeFuncao]) {
+                    vezesNaFuncao = historicoSolene[m.id][nomeFuncao];
+                }
+                let textoContador = vezesNaFuncao > 0 ? ` [${vezesNaFuncao}x]` : "";
+
+                options += `<option value="${m.id}">${m.nome} ${textoContador}</option>`;
             });
 
-            const selectHtml = `<select class="select-membro">${options}</select>`;
+            const selectHtml = `<select class="select-membro" onchange="atualizarDisponibilidadeMembros()">${options}</select>`;
             const botaoRemover = (idLinha && permiteMaisPessoas && ehAdicional)
                 ? `<button type="button" class="btn-remover-pessoa" onclick="removerPessoaDaFuncao(this.closest('.campo-pessoa'))">- Remover</button>`
                 : '';
@@ -384,27 +240,44 @@
             return `<div class="campo-pessoa">${selectHtml}${botaoRemover}</div>`;
         }
 
-        function adicionarPessoaNaFuncao(idLinha, restritoMor) {
+        function adicionarPessoaNaFuncao(idLinha, restritoMor, nomeFuncao) {
             const container = document.getElementById(`selects_${idLinha}`);
             if (!container) return;
-            container.insertAdjacentHTML('beforeend', gerarSelectMembros(restritoMor, idLinha, true, true));
+            container.insertAdjacentHTML('beforeend', gerarSelectMembros(restritoMor, idLinha, true, true, nomeFuncao));
+            atualizarDisponibilidadeMembros();
+        }
+
+        function atualizarDisponibilidadeMembros() {
+            const selects = document.querySelectorAll('.select-membro');
+            const selecionados = [];
+
+            selects.forEach(select => {
+                if (select.value !== "") selecionados.push(select.value);
+            });
+
+            selects.forEach(select => {
+                const options = select.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === "") return; 
+                    if (selecionados.includes(option.value) && select.value !== option.value) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+            });
         }
 
         function moverFuncao(idLinha, direcao) {
             const tbody = document.getElementById('corpo-tabela-solene');
             if (!tbody) return;
-
             const linhas = [...tbody.children];
             const idsGrupo = obterIdsDaFuncao(idLinha);
-            const linhasSelecionadas = idsGrupo
-                .map(id => linhas.find(row => row.id === id))
-                .filter(Boolean);
-
+            const linhasSelecionadas = idsGrupo.map(id => linhas.find(row => row.id === id)).filter(Boolean);
             if (!linhasSelecionadas.length) return;
 
             const posicaoAtual = linhas.findIndex(row => row.id === idLinha);
             const proximaPosicao = posicaoAtual + (direcao === 'up' ? -1 : 1);
-
             if (proximaPosicao < 0 || proximaPosicao >= linhas.length) return;
 
             const linhaDestino = linhas[proximaPosicao];
@@ -422,59 +295,80 @@
         }
 
         function obterIdsDaFuncao(idLinha) {
-            if (idLinha.endsWith('_baculo')) {
-                return [idLinha.replace('_baculo', ''), idLinha];
-            }
-
-            if (idLinha.startsWith('opc_mitra_')) {
-                return [idLinha, idLinha + '_baculo'];
-            }
-
+            if (idLinha.endsWith('_baculo')) return [idLinha.replace('_baculo', ''), idLinha];
+            if (idLinha.startsWith('opc_mitra_')) return [idLinha, idLinha + '_baculo'];
             return [idLinha];
         }
 
         function removerPessoaDaFuncao(campoPessoa) {
-            if (campoPessoa) {
-                campoPessoa.remove();
-            }
+            if (campoPessoa) { campoPessoa.remove(); atualizarDisponibilidadeMembros(); }
         }
 
         function adicionarFuncaoOpcional(nome, qtd, ehLivre = false, restritoMor = false, permiteMais = false) {
-            if (!ehLivre && adicionadosUnicos.includes(nome)) {
-                alert(`A função "${nome}" já está na escala solene.`);
-                return;
-            }
+            if (!ehLivre && adicionadosUnicos.includes(nome)) { alert(`A função "${nome}" já está na escala solene.`); return; }
             if (!ehLivre) adicionadosUnicos.push(nome);
-
             const idUnico = 'opc_' + Date.now() + Math.random().toString(36).substr(2, 5);
             criarLinhaTabela(nome, qtd, restritoMor, idUnico, permiteMais, true);
+            atualizarDisponibilidadeMembros();
         }
 
         function adicionarMitraBaculo() {
-            if (adicionadosUnicos.includes("Mitra e Báculo")) {
-                alert("As funções de Mitra e Báculo já foram adicionadas.");
-                return;
-            }
+            if (adicionadosUnicos.includes("Mitra e Báculo")) { alert("As funções já foram adicionadas."); return; }
             adicionadosUnicos.push("Mitra e Báculo");
-
             const idUnico = 'opc_mitra_' + Date.now();
             criarLinhaTabela("Mitra", 1, false, idUnico, false, true);
             criarLinhaTabela("Báculo", 1, false, idUnico + '_baculo', false, true);
+            atualizarDisponibilidadeMembros();
         }
 
         function removerFuncao(idLinha, nomeFuncao) {
             if (nomeFuncao === "Mitra" || nomeFuncao === "Báculo") {
-                document.getElementById(idLinha)?.remove();
-                document.getElementById(idLinha + '_baculo')?.remove();
-                if (nomeFuncao === "Báculo") {
-                    let idBase = idLinha.replace('_baculo', '');
-                    document.getElementById(idBase)?.remove();
-                }
+                document.getElementById(idLinha)?.remove(); document.getElementById(idLinha + '_baculo')?.remove();
+                if (nomeFuncao === "Báculo") { let idBase = idLinha.replace('_baculo', ''); document.getElementById(idBase)?.remove(); }
                 adicionadosUnicos = adicionadosUnicos.filter(x => x !== "Mitra e Báculo");
             } else {
-                document.getElementById(idLinha)?.remove();
-                adicionadosUnicos = adicionadosUnicos.filter(x => x !== nomeFuncao);
+                document.getElementById(idLinha)?.remove(); adicionadosUnicos = adicionadosUnicos.filter(x => x !== nomeFuncao);
             }
+            atualizarDisponibilidadeMembros();
+        }
+
+        // --- SISTEMA DE EXPORTAÇÃO DE IMAGEM ---
+        function baixarImagem() {
+            const container = document.getElementById('area-escala');
+            const corFundo = document.getElementById('cor-fundo').value;
+            const selects = document.querySelectorAll('.select-membro');
+
+            // 1. Limpa caixas vazias para não poluir a foto
+            selects.forEach(s => {
+                if (s.value === "") {
+                    s.dataset.defaultText = s.options[s.selectedIndex].text;
+                    s.options[s.selectedIndex].text = "";
+                }
+            });
+
+            // 2. Aplica CSS de camuflagem e troca fundo
+            container.classList.add('modo-exportacao');
+            const oldBg = container.style.backgroundColor;
+            container.style.backgroundColor = corFundo;
+
+            // 3. Tira a foto
+            html2canvas(container, { backgroundColor: corFundo, scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Escala_Solene.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                // 4. Restaura tudo ao normal
+                container.classList.remove('modo-exportacao');
+                container.style.backgroundColor = oldBg;
+                
+                selects.forEach(s => {
+                    if (s.dataset.defaultText) {
+                        s.options[s.selectedIndex].text = s.dataset.defaultText;
+                        delete s.dataset.defaultText;
+                    }
+                });
+            });
         }
     </script>
 </body>

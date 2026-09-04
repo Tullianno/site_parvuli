@@ -14,37 +14,228 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); padding: 15px; padding-bottom: 80px; }
+        body {
+            background-color: var(--bg-color);
+            padding: 12px;
+            padding-bottom: 72px;
+        }
 
-        .header-nav { display: flex; align-items: center; margin-bottom: 15px; }
-        .btn-voltar { text-decoration: none; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: var(--card-bg); padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
 
-        .escala-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-voltar {
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            display: inline-block;
+        }
+
+        .escala-container {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
 
         /* Cabeçalho da Solenidade */
-        .solene-topo { border: 2px dashed var(--primary); background-color: var(--accent-solene); padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
-        .solene-topo h2 { font-size: 1.2rem; text-transform: uppercase; margin-bottom: 5px; color: #856404; }
-        .solene-topo p { font-size: 1rem; font-weight: bold; }
+        .solene-topo {
+            border: 2px dashed var(--primary);
+            background-color: var(--accent-solene);
+            padding: 14px 12px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .solene-topo h2 {
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            color: #856404;
+        }
+
+        .solene-topo p {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
 
         /* Tabela da Solenidade */
-        table { width: 100%; border-collapse: collapse; border: 2px solid var(--border-color); }
-        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; vertical-align: middle; font-size: 0.95rem; }
-        th { background-color: #f0f0f0; text-align: center; }
-        
-        .coluna-funcao { width: 40%; font-weight: bold; background-color: #fafafa; }
-        .coluna-nomes { width: 60%; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid var(--border-color);
+            table-layout: fixed;
+        }
 
-        .select-membro { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px; font-size: 0.9rem; }
-        .select-membro:last-child { margin-bottom: 0; }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .coluna-funcao {
+            width: 42%;
+            font-weight: 700;
+            background-color: #fafafa;
+        }
+
+        .coluna-nomes {
+            width: 58%;
+        }
+
+        .select-membro {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
 
         /* Painel de Adicionar Funções Opcionais */
-        .painel-adicionais { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ccc; }
-        .painel-adicionais h3 { font-size: 1rem; margin-bottom: 10px; }
-        .botoes-adicionais { display: flex; flex-wrap: wrap; gap: 8px; }
-        .btn-add { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .painel-adicionais {
+            margin-top: 18px;
+            background: #fff;
+            padding: 14px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .painel-adicionais h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .botoes-adicionais {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        /* Botões Gerais */
+        .btn-base {
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add {
+            background: #28a745;
+            color: white;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+        }
         .btn-add:hover { background: #218838; }
 
-        .btn-remover-funcao { background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; float: right; }
+        .btn-livre {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+        }
+        .btn-livre:hover { background: #138496; }
+
+        .acoes-funcao {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .btn-mover,
+        .btn-remover-funcao {
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 5px 8px;
+            width: 100%;
+        }
+
+        .btn-mover {
+            background: #6f42c1;
+        }
+
+        .btn-remover-funcao {
+            background: #dc3545;
+        }
+
+        .btn-add-pessoa {
+            background: #007bff;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-add-pessoa:hover { background: #0056b3; }
+
+        .btn-remover-pessoa {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            padding: 6px 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-remover-pessoa:hover { background: #545b62; }
+
+        .lista-selects {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .campo-pessoa {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .escala-container {
+                padding: 16px;
+            }
+
+            .botoes-adicionais {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .campo-pessoa {
+                grid-template-columns: 1fr auto;
+            }
+
+            .btn-remover-pessoa {
+                width: auto;
+                min-width: 90px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -68,25 +259,37 @@
                 </tr>
             </thead>
             <tbody id="corpo-tabela-solene">
-                <!-- Funções Fixas inseridas via JS -->
+                <!-- Funções inseridas via JS -->
             </tbody>
         </table>
 
-        <!-- Painel para adicionar funções extras -->
+        <!-- Painel para adicionar funções extras e readicionar removidas -->
         <div class="painel-adicionais">
-            <h3>Adicionar Funções Especiais</h3>
+            <h3>Adicionar Funções à Escala</h3>
             <div class="botoes-adicionais">
-                <button class="btn-add" onclick="adicionarFuncaoOpcional('Missal', 1)">+ Missal</button>
-                <button class="btn-add" onclick="adicionarMitraBaculo()">+ Mitra e Báculo</button>
-                <button class="btn-add" onclick="adicionarFuncaoOpcional('Palio', 4)">+ Pálio (4 pessoas)</button>
-                <button class="btn-add" onclick="adicionarFuncaoOpcional('Apoio', 1, true)">+ Apoio (Livre)</button>
+                <!-- Funções Principais -->
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Mor', 1, false, true, false)">+ Mor</button>
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Cruz e leituras', 1)">+ Cruz e leituras</button>
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Turíbulo', 1)">+ Turíbulo</button>
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Naveta', 1)">+ Naveta</button>
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Velas', 2, false, false, true)">+ Velas</button>
+                
+                <!-- Funções Especiais -->
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Missal', 1)">+ Missal</button>
+                <button class="btn-base btn-add" onclick="adicionarMitraBaculo()">+ Mitra e Báculo</button>
+                <button class="btn-base btn-add" onclick="adicionarFuncaoOpcional('Palio', 4)">+ Pálio (4 pessoas)</button>
+                
+                <!-- Funções com múltiplas pessoas -->
+                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Leituras', 1, false, false, true)">+ Leituras</button>
+                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Apoio', 1, false, false, true)">+ Apoio</button>
+                <button class="btn-base btn-livre" onclick="adicionarFuncaoOpcional('Matracas', 1, false, false, true)">+ Matracas</button>
             </div>
         </div>
 
     </main>
 
     <script>
-        // Banco simulado de membros com suas respectivas funções reais no grupo
+        // Banco simulado de membros
         const membrosGeral = [
             { id: 1, nome: "Túlio Rocha", funcaoGrupo: "Cerimoniário Mor" },
             { id: 2, nome: "Pedro Alves", funcaoGrupo: "Cerimoniário Mor" },
@@ -95,34 +298,28 @@
             { id: 5, nome: "Mateus", funcaoGrupo: "Acólito" }
         ];
 
-        // Funções fixas obrigatórias da Missa Solene e quantas pessoas cada uma exige
-        const funcoesFixas = [
-            { nome: "Mor", qtd: 1, restritoMor: true },
-            { nome: "Cruz e leituras", qtd: 1, restritoMor: false },
-            { nome: "Turíbulo", qtd: 1, restritoMor: false },
-            { nome: "Naveta", qtd: 1, restritoMor: false },
-            { nome: "Velas", qtd: 2, restritoMor: false }
+        // Todas as funções agora são tratadas como editáveis. Aqui definimos as que já vêm preenchidas.
+        const funcoesIniciais = [
+            { nome: "Mor", qtd: 1, restritoMor: true, permiteMais: false, removivel: false },
+            { nome: "Cruz e leituras", qtd: 1, restritoMor: false, permiteMais: false, removivel: false },
+            { nome: "Turíbulo", qtd: 1, restritoMor: false, permiteMais: false, removivel: false },
+            { nome: "Naveta", qtd: 1, restritoMor: false, permiteMais: false, removivel: false },
+            { nome: "Velas", qtd: 2, restritoMor: false, permiteMais: true, removivel: false }
         ];
 
-        // Rastreio de quais opcionais já foram adicionados para respeitar a regra de "somente uma vez"
         let adicionadosUnicos = [];
 
         window.onload = () => {
-            // Pega o parâmetro da URL (ex: ?missa=2026-09-06T10:00)
             const urlParams = new URLSearchParams(window.location.search);
             const missaId = urlParams.get('missa');
 
             if (missaId) {
-                // O missaId vem no formato "AAAA-MM-DDTHH:MM"
                 const [dataParte, hora] = missaId.split('T');
                 const [ano, mes, dia] = dataParte.split('-');
-                
                 const dataObj = new Date(ano, mes - 1, dia);
                 const diaSemanaTexto = dataObj.getDay() === 0 ? "Domingo" : "Sábado";
                 
-                // Atualiza o texto na tela solene
-                document.getElementById('data-hora-texto').innerText = `${diaSemanaTexto} (${dia}/${mes}/${ano}) - ${hora}`;
-                // Futuramente aqui você pode cruzar com a API do General Roman Calendar para puxar o dia litúrgico exato
+                document.getElementById('data-hora-texto').innerText = `${diaSemanaTexto} (${dia}/${mes}) - ${hora}`;
             }
 
             renderizarTabelaSolene();
@@ -131,26 +328,37 @@
         function renderizarTabelaSolene() {
             const tbody = document.getElementById('corpo-tabela-solene');
             tbody.innerHTML = '';
+            adicionadosUnicos = [];
 
-            // Renderiza as fixas
-            funcoesFixas.forEach(f => criarLinhaTabela(f.nome, f.qtd, f.restritoMor, false));
+            funcoesIniciais.forEach(f => {
+                adicionadosUnicos.push(f.nome);
+                let idUnico = 'linha_' + f.nome.replace(/\s+/g, '');
+                criarLinhaTabela(f.nome, f.qtd, f.restritoMor, idUnico, f.permiteMais, true);
+            });
         }
 
-        function criarLinhaTabela(nomeFuncao, quantidade, restritoMor, ehOpcional, idOpcional = null) {
+        function criarLinhaTabela(nomeFuncao, quantidade, restritoMor, idLinha, permiteMaisPessoas, removivel = true) {
             const tbody = document.getElementById('corpo-tabela-solene');
             const tr = document.createElement('tr');
-            if (idOpcional) tr.id = idOpcional;
+            tr.id = idLinha;
 
-            // Coluna da Função
-            let htmlFuncao = nomeFuncao;
-            if (ehOpcional) {
-                htmlFuncao += ` <button class="btn-remover-funcao" onclick="removerFuncao('${idOpcional}', '${nomeFuncao}')">Remover</button>`;
-            }
+            let htmlFuncao = `${nomeFuncao}`;
+            htmlFuncao += `
+                <div class="acoes-funcao">
+                    <button class="btn-mover btn-base" onclick="moverFuncao('${idLinha}', 'up')" title="Subir função">↑</button>
+                    <button class="btn-mover btn-base" onclick="moverFuncao('${idLinha}', 'down')" title="Descer função">↓</button>
+                    <button class="btn-remover-funcao btn-base" onclick="removerFuncao('${idLinha}', '${nomeFuncao}')">Remover</button>
+                </div>
+            `;
 
-            // Coluna dos Nomes (Gera quantidade exata de selects exigidos pela regra)
-            let htmlSelects = '';
+            let htmlSelects = `<div id="selects_${idLinha}" class="lista-selects">`;
             for (let i = 0; i < quantidade; i++) {
-                htmlSelects += gerarSelectMembros(restritoMor);
+                htmlSelects += gerarSelectMembros(restritoMor, idLinha, permiteMaisPessoas, false);
+            }
+            htmlSelects += `</div>`;
+
+            if (permiteMaisPessoas) {
+                htmlSelects += `<button type="button" class="btn-add-pessoa btn-base" onclick="adicionarPessoaNaFuncao('${idLinha}', ${restritoMor})">+ Nome</button>`;
             }
 
             tr.innerHTML = `
@@ -160,36 +368,88 @@
             tbody.appendChild(tr);
         }
 
-        function gerarSelectMembros(apenasCerimoniarioMor) {
+        function gerarSelectMembros(apenasCerimoniarioMor, idLinha = null, permiteMaisPessoas = false, ehAdicional = false) {
             let options = '<option value="">Selecione o membro...</option>';
             
             membrosGeral.forEach(m => {
-                // Se a função for "Mor", filtra apenas quem é Cerimoniário Mor. 
-                // Caso contrário, exibe todos (já que Cerimoniários Mores também podem participar de qualquer outra função).
-                if (apenasCerimoniarioMor && m.funcaoGrupo !== "Cerimoniário Mor") {
-                    return; 
-                }
+                if (apenasCerimoniarioMor && m.funcaoGrupo !== "Cerimoniário Mor") return; 
                 options += `<option value="${m.id}">${m.nome} (${m.funcaoGrupo})</option>`;
             });
 
-            return `<select class="select-membro">${options}</select>`;
+            const selectHtml = `<select class="select-membro">${options}</select>`;
+            const botaoRemover = (idLinha && permiteMaisPessoas && ehAdicional)
+                ? `<button type="button" class="btn-remover-pessoa" onclick="removerPessoaDaFuncao(this.closest('.campo-pessoa'))">- Remover</button>`
+                : '';
+
+            return `<div class="campo-pessoa">${selectHtml}${botaoRemover}</div>`;
         }
 
-        // Lógica para adicionar funções opcionais respeitando as regras
-        function adicionarFuncaoOpcional(nome, qtd, ehLivre = false) {
+        function adicionarPessoaNaFuncao(idLinha, restritoMor) {
+            const container = document.getElementById(`selects_${idLinha}`);
+            if (!container) return;
+            container.insertAdjacentHTML('beforeend', gerarSelectMembros(restritoMor, idLinha, true, true));
+        }
+
+        function moverFuncao(idLinha, direcao) {
+            const tbody = document.getElementById('corpo-tabela-solene');
+            if (!tbody) return;
+
+            const linhas = [...tbody.children];
+            const idsGrupo = obterIdsDaFuncao(idLinha);
+            const linhasSelecionadas = idsGrupo
+                .map(id => linhas.find(row => row.id === id))
+                .filter(Boolean);
+
+            if (!linhasSelecionadas.length) return;
+
+            const posicaoAtual = linhas.findIndex(row => row.id === idLinha);
+            const proximaPosicao = posicaoAtual + (direcao === 'up' ? -1 : 1);
+
+            if (proximaPosicao < 0 || proximaPosicao >= linhas.length) return;
+
+            const linhaDestino = linhas[proximaPosicao];
+            if (idsGrupo.includes(linhaDestino.id)) return;
+
+            const listaSemGrupo = linhas.filter(row => !idsGrupo.includes(row.id));
+            const linhaDestinoSemGrupo = listaSemGrupo.find(row => row.id === linhaDestino.id);
+            const indiceDestino = listaSemGrupo.indexOf(linhaDestinoSemGrupo);
+            const novoArray = [...listaSemGrupo];
+            const indiceInsercao = indiceDestino + (direcao === 'down' ? 1 : 0);
+            novoArray.splice(indiceInsercao, 0, ...linhasSelecionadas);
+
+            tbody.innerHTML = '';
+            novoArray.forEach(row => tbody.appendChild(row));
+        }
+
+        function obterIdsDaFuncao(idLinha) {
+            if (idLinha.endsWith('_baculo')) {
+                return [idLinha.replace('_baculo', ''), idLinha];
+            }
+
+            if (idLinha.startsWith('opc_mitra_')) {
+                return [idLinha, idLinha + '_baculo'];
+            }
+
+            return [idLinha];
+        }
+
+        function removerPessoaDaFuncao(campoPessoa) {
+            if (campoPessoa) {
+                campoPessoa.remove();
+            }
+        }
+
+        function adicionarFuncaoOpcional(nome, qtd, ehLivre = false, restritoMor = false, permiteMais = false) {
             if (!ehLivre && adicionadosUnicos.includes(nome)) {
-                alert(`A função "${nome}" só pode ser adicionada uma vez na escala solene.`);
+                alert(`A função "${nome}" já está na escala solene.`);
                 return;
             }
-            if (!ehLivre) {
-                adicionadosUnicos.push(nome);
-            }
+            if (!ehLivre) adicionadosUnicos.push(nome);
 
-            const idUnico = 'opc_' + Date.now() + Math.random();
-            criarLinhaTabela(nome, qtd, false, true, idUnico);
+            const idUnico = 'opc_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            criarLinhaTabela(nome, qtd, restritoMor, idUnico, permiteMais, true);
         }
 
-        // Regra especial: Mitra e Báculo adicionadas em conjunto automaticamente
         function adicionarMitraBaculo() {
             if (adicionadosUnicos.includes("Mitra e Báculo")) {
                 alert("As funções de Mitra e Báculo já foram adicionadas.");
@@ -198,15 +458,18 @@
             adicionadosUnicos.push("Mitra e Báculo");
 
             const idUnico = 'opc_mitra_' + Date.now();
-            criarLinhaTabela("Mitra", 1, false, true, idUnico);
-            criarLinhaTabela("Báculo", 1, false, true, idUnico + '_baculo');
+            criarLinhaTabela("Mitra", 1, false, idUnico, false, true);
+            criarLinhaTabela("Báculo", 1, false, idUnico + '_baculo', false, true);
         }
 
         function removerFuncao(idLinha, nomeFuncao) {
             if (nomeFuncao === "Mitra" || nomeFuncao === "Báculo") {
-                // Remove ambas se for o par
                 document.getElementById(idLinha)?.remove();
                 document.getElementById(idLinha + '_baculo')?.remove();
+                if (nomeFuncao === "Báculo") {
+                    let idBase = idLinha.replace('_baculo', '');
+                    document.getElementById(idBase)?.remove();
+                }
                 adicionadosUnicos = adicionadosUnicos.filter(x => x !== "Mitra e Báculo");
             } else {
                 document.getElementById(idLinha)?.remove();

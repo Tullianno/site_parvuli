@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Escala - PARVULI</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #8b0000;
+            --border-color: #000;
+            --green-light: #d4edda;
+            --red-light: #f8d7da;
+            --card-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); padding: 15px; padding-bottom: 80px; /* Espaço para botões fixos no celular */ }
+
+        /* Controles do Topo (Mês) */
+        .controles-topo { background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        .controles-topo label { font-weight: bold; margin-right: 10px; }
+        .controles-topo input[type="month"] { padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+
+        /* Área da Escala (A que será exportada como imagem) */
+        .escala-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow-x: auto; }
+        
+        /* Cabeçalho Específico (Lado a Lado e Centralizado) */
+        .escala-header { 
+            display: flex; 
+            flex-direction: row; /* Coloca um ao lado do outro */
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .logo-parvuli { 
+            width: 80px; /* Reduzido levemente para o mobile */
+            height: auto; 
+            object-fit: contain; 
+        }
+        
+        .caixa-tracejada { 
+            border: 2px dashed var(--border-color); 
+            padding: 10px 15px; 
+            text-align: center; 
+            flex: 1; /* Faz a caixa se adaptar ao espaço */
+            max-width: 250px; 
+        }
+        .caixa-tracejada h2 { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .caixa-tracejada p { font-size: 1rem; font-weight: bold; }
+
+        /* Tabela Estilo Excel */
+        table { width: 100%; min-width: 300px; border-collapse: collapse; border: 2px solid var(--border-color); }
+        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: center; vertical-align: middle; font-size: 0.9rem; }
+        th { background-color: #f0f0f0; font-size: 1rem; }
+        
+        .linha-liturgica { background-color: #e2e3e5; font-weight: bold; font-size: 1rem; text-transform: uppercase; }
+        .input-nomes { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        
+        /* Controles da Tabela */
+        .controles-missa { display: flex; flex-direction: column; gap: 5px; align-items: center; margin-top: 5px; font-size: 0.75rem; }
+        .btn-solenidade { background: #ffc107; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; width: 100%; }
+        .linha-solene { background-color: #fff3cd !important; }
+        .tag-solenidade { color: #856404; font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px; }
+
+        /* Cores de Disponibilidade */
+        .pode-ir { background-color: var(--green-light) !important; transition: background 0.3s; }
+        .nao-pode { background-color: var(--red-light) !important; transition: background 0.3s; }
+
+        /* Botão Flutuante / Fixo para Mobile */
+        .btn-acao-fixa { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 100; width: 90%; max-width: 350px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Modal de Membros */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .membro-btn { display: block; width: 100%; padding: 12px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; text-align: left; font-size: 1rem; }
+        .membro-btn:hover { background: #f0f0f0; }
+
+        /* Botão de Voltar ao Dashboard */
+        .header-nav { display: flex; align-items: center; margin-bottom: 15px; }
+        .btn-voltar { 
+            text-decoration: none; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            color: var(--primary); 
+            background: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Estilos para a Escala Dinâmica (Substitui o Input de Texto) */
+        .area-nomes { width: 100%; min-height: 35px; padding: 5px; border: 1px dashed var(--primary); border-radius: 4px; cursor: pointer; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; background-color: #fcfcfc; }
+        .text-muted { color: #888; font-size: 0.85rem; font-style: italic; }
+        
+        .badge-nome { background: var(--primary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .badge-nome span { cursor: pointer; background: rgba(0,0,0,0.2); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; }
+        
+        .contador-badge { float: right; font-size: 0.75rem; background: #ddd; color: #333; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- Botão de Retornar -->
+    <div class="header-nav">
+        <a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a>
+    </div>
+
+    <!-- Controle de Mês -->
+    <div class="controles-topo">
+        <label for="mes-selecionado">Selecione o Mês da Escala:</label>
+        <input type="month" id="mes-selecionado" onchange="gerarEscalaDoMes()">
+    </div>
+
+    <!-- Área Principal: Escala -->
+    <main class="escala-container" id="area-escala">
+        <div class="escala-header">
+            <img src="../../public/Parvuli_Servi.png" alt="Parvuli Servi" class="logo-parvuli" onerror="this.src='https://via.placeholder.com/120x120?text=Logo+Parvuli'">
+            <div class="caixa-tracejada">
+                <h2>Parvuli Servi</h2>
+                <p>Escala Mensal: <span id="mes-extenso">...</span></p>
+            </div>
+        </div>
+
+        <table id="tabela-escala">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Data</th>
+                    <th style="width: 20%;">Hora</th>
+                    <th style="width: 55%;">Nomes</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-escala">
+                <!-- Linhas geradas via JS -->
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Botão de Ação para Celular -->
+    <button class="btn-acao-fixa" onclick="abrirModalMembros()" id="btn-verificar">
+        🔍 Verificar Disponibilidade
+        <span>+</span>
+    </button>
+
+    <!-- Modal de Membros -->
+    <div class="modal-overlay" id="modalMembros">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Selecione um Membro</h2>
+                <span style="font-size: 1.5rem; cursor: pointer;" onclick="fecharModalMembros()">&times;</span>
+            </div>
+            <p style="font-size: 0.85rem; margin-bottom: 15px; color: #666;">A tabela ficará verde nos horários que ele pode, e vermelha onde não pode.</p>
+            <div id="lista-membros">
+                <!-- Gerado via JS -->
+            </div>
+            <button class="membro-btn" style="text-align: center; background: #eee; font-weight: bold; margin-top: 15px;" onclick="limparFiltro()">Limpar Filtro</button>
+        </div>
+    </div>
+
+    <script>
+        // Dados Simulados
+        const membros = [
+            { id: 1, nome: "Túlio Rocha", indisponivelEm: ["2026-09-06T07:30", "2026-09-12T17:00"] },
+            { id: 2, nome: "Gigi", indisponivelEm: ["2026-09-05T17:00"] },
+            { id: 3, nome: "João Pedro", indisponivelEm: [] }
+        ];
+
+        // Variáveis de Estado (A "Memória" da Escala)
+        let modoEscalaAtivo = null; // Guarda o membro selecionado para a "pintura"
+        let alocacoes = {};         // Guarda quem está em cada missa: { "id_missa": [id1, id2] }
+        let missaFDS = {};          // Guarda a qual Fim de Semana a missa pertence
+        let contadorMensal = {};    // Guarda quantas missas cada membro tem no mês
+
+        // Inicialização
+        window.onload = () => {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            document.getElementById('mes-selecionado').value = `${ano}-${mes}`;
+            gerarEscalaDoMes();
+        };
+
+        function gerarEscalaDoMes() {
+            document.getElementById('corpo-escala').innerHTML = '';
+            
+            // Reseta a memória ao mudar de mês
+            alocacoes = {}; missaFDS = {}; contadorMensal = {}; limparFiltro();
+            
+            const mesValue = document.getElementById('mes-selecionado').value;
+            if(!mesValue) return;
+
+            const [ano, mes] = mesValue.split('-');
+            const dataInicial = new Date(ano, mes - 1, 1);
+            
+            const mesesExtenso = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('mes-extenso').innerText = `${mesesExtenso[dataInicial.getMonth()]} ${ano}`;
+
+            let diasNoMes = new Date(ano, mes, 0).getDate();
+            let domingoContador = 1;
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                let dataAtual = new Date(ano, mes - 1, dia);
+                let diaSemana = dataAtual.getDay();
+
+                if (dia === 1 && diaSemana === 0) {
+                    renderizarFimDeSemana(null, dataAtual, domingoContador);
+                    domingoContador++;
+                }
+                
+                if (diaSemana === 6) {
+                    let dataSabado = dataAtual;
+                    let dataDomingo = new Date(ano, mes - 1, dia + 1);
+                    renderizarFimDeSemana(dataSabado, dataDomingo, domingoContador);
+                    domingoContador++;
+                }
+            }
+        }
+
+        function renderizarFimDeSemana(dataSabado, dataDomingo, cont) {
+            const tbody = document.getElementById('corpo-escala');
+            
+            const trLiturgico = document.createElement('tr');
+            trLiturgico.innerHTML = `<td colspan="3" class="linha-liturgica">${cont}º Domingo do Tempo Comum</td>`;
+            tbody.appendChild(trLiturgico);
+
+            if (dataSabado) adicionarMissaTabela(dataSabado, "Sábado", "17:00", true, cont);
+            if (dataDomingo) {
+                adicionarMissaTabela(dataDomingo, "Domingo", "07:30", true, cont);
+                adicionarMissaTabela(dataDomingo, "Domingo", "10:00", false, cont);
+                adicionarMissaTabela(dataDomingo, "Domingo", "17:00", false, cont);
+                adicionarMissaTabela(dataDomingo, "Domingo", "19:00", false, cont);
+            }
+        }
+
+        function adicionarMissaTabela(dataObj, diaTexto, horario, isPrimeira, fdsCont) {
+            const tbody = document.getElementById('corpo-escala');
+            
+            const diaFormato = String(dataObj.getDate()).padStart(2, '0');
+            const mesFormato = String(dataObj.getMonth() + 1).padStart(2, '0');
+            const dataStr = `${diaTexto} (${diaFormato}/${mesFormato})`;
+            const idUnico = `${dataObj.getFullYear()}-${mesFormato}-${diaFormato}T${horario}`;
+
+            missaFDS[idUnico] = fdsCont; // Salva a qual FDS essa missa pertence
+
+            const tr = document.createElement('tr');
+            tr.dataset.missaId = idUnico;
+            
+            // Aqui substituímos o input de texto pela div interativa (area-nomes)
+            tr.innerHTML = `
+                <td>${isPrimeira ? `<strong>${dataStr}</strong>` : ''}</td>
+                <td>
+                    <strong>${horario}</strong>
+                    <div class="controles-missa">
+                        <label><input type="checkbox" onchange="toggleSolenidade(this, '${idUnico}')"> Solene</label>
+                    </div>
+                </td>
+                <td>
+                    <div class="area-nomes" id="nomes_${idUnico}" onclick="clicouMissa('${idUnico}')">
+                        <span class="text-muted">Toque para escalar (0/2)</span>
+                    </div>
+                    <span class="tag-solenidade" id="tag_${idUnico}" style="display:none;">SOLENIDADE</span>
+                    <button class="btn-solenidade" id="btn_solene_${idUnico}" onclick="abrirEscalaSolene('${idUnico}')">Editar Escala Solene</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        /* --- LÓGICA DE ALOCAÇÃO ("PAINT BUCKET") --- */
+
+        function abrirModalMembros() { 
+            renderizarListaMembrosModal();
+            document.getElementById('modalMembros').style.display = 'flex'; 
+        }
+        function fecharModalMembros() { document.getElementById('modalMembros').style.display = 'none'; }
+
+        function renderizarListaMembrosModal() {
+            const lista = document.getElementById('lista-membros');
+            lista.innerHTML = '';
+            membros.forEach(membro => {
+                let count = contadorMensal[membro.id] || 0;
+                const btn = document.createElement('button');
+                btn.className = 'membro-btn';
+                // Mostra o contador de missas no botão do membro
+                btn.innerHTML = `${membro.nome} <span class="contador-badge">${count} missas</span>`;
+                btn.onclick = () => selecionarModoEscala(membro);
+                lista.appendChild(btn);
+            });
+        }
+
+        function selecionarModoEscala(membro) {
+            modoEscalaAtivo = membro;
+            document.querySelectorAll('#corpo-escala tr').forEach(tr => tr.classList.remove('pode-ir', 'nao-pode'));
+
+            // Colore a tabela
+            document.querySelectorAll('tr[data-missa-id]').forEach(linha => {
+                if (membro.indisponivelEm.includes(linha.dataset.missaId)) {
+                    linha.classList.add('nao-pode');
+                } else {
+                    linha.classList.add('pode-ir');
+                }
+            });
+
+            // Atualiza o botão fixo para mostrar que estamos no modo de alocação
+            document.getElementById('btn-verificar').innerHTML = `Modo Escala: ${membro.nome} <span>(Sair)</span>`;
+            document.getElementById('btn-verificar').onclick = limparFiltro;
+            
+            fecharModalMembros();
+        }
+
+        function clicouMissa(missaId) {
+            if (!modoEscalaAtivo) {
+                abrirModalMembros();
+                return;
+            }
+
+            const membro = modoEscalaAtivo;
+
+            // 1. Bloqueia se estiver indisponível
+            if (membro.indisponivelEm.includes(missaId)) {
+                alert(`Bloqueado: ${membro.nome} marcou que não pode neste horário.`);
+                return;
+            }
+
+            if (!alocacoes[missaId]) alocacoes[missaId] = [];
+
+            // 2. Se já está nesta missa, ignora (ou pode implementar remover com clique aqui)
+            if (alocacoes[missaId].includes(membro.id)) {
+                alert(`${membro.nome} já está escalado nesta missa.`);
+                return;
+            }
+
+            // 3. Verifica Limite de 2 pessoas
+            if (alocacoes[missaId].length >= 2) {
+                alert(`Esta missa já atingiu o limite de 2 acólitos.`);
+                return;
+            }
+
+            // 4. Verifica se já está em outra missa no mesmo Fim de Semana
+            const fdsDaMissa = missaFDS[missaId];
+            const missasDoMembro = Object.keys(alocacoes).filter(id => alocacoes[id].includes(membro.id));
+            const jaNoFds = missasDoMembro.some(id => missaFDS[id] === fdsDaMissa);
+
+            if (jaNoFds) {
+                const confirma = confirm(`Atenção: ${membro.nome} já está em uma missa neste mesmo fim de semana. Deseja escalar assim mesmo?`);
+                if (!confirma) return;
+            }
+
+            // Adiciona a pessoa
+            alocacoes[missaId].push(membro.id);
+            contadorMensal[membro.id] = (contadorMensal[membro.id] || 0) + 1;
+            
+            atualizarRenderizacaoMissa(missaId);
+        }
+
+        function removerAlocacao(missaId, membroId) {
+            alocacoes[missaId] = alocacoes[missaId].filter(id => id !== membroId);
+            contadorMensal[membroId]--;
+            atualizarRenderizacaoMissa(missaId);
+        }
+
+        function atualizarRenderizacaoMissa(missaId) {
+            const area = document.getElementById(`nomes_${missaId}`);
+            if (!alocacoes[missaId] || alocacoes[missaId].length === 0) {
+                area.innerHTML = '<span class="text-muted">Toque para escalar (0/2)</span>';
+                return;
+            }
+            
+            area.innerHTML = '';
+            alocacoes[missaId].forEach(membroId => {
+                const m = membros.find(x => x.id === membroId);
+                // Cria a tag com o nome e o botão de (X) para remover
+                area.innerHTML += `<div class="badge-nome">${m.nome} <span onclick="event.stopPropagation(); removerAlocacao('${missaId}', ${m.id})">&times;</span></div>`;
+            });
+        }
+
+        function limparFiltro() {
+            modoEscalaAtivo = null;
+            document.querySelectorAll('#corpo-escala tr').forEach(tr => tr.classList.remove('pode-ir', 'nao-pode'));
+            document.getElementById('btn-verificar').innerHTML = `🔍 Escolher Membro para Escalar <span>+</span>`;
+            document.getElementById('btn-verificar').onclick = abrirModalMembros;
+            fecharModalMembros();
+        }
+
+        // Lógica Visual da Solenidade
+        function toggleSolenidade(checkbox, idUnico) {
+            const row = document.querySelector(`tr[data-missa-id="${idUnico}"]`);
+            const divNomes = document.getElementById(`nomes_${idUnico}`);
+            const tag = document.getElementById(`tag_${idUnico}`);
+            const btn = document.getElementById(`btn_solene_${idUnico}`);
+
+            if (checkbox.checked) {
+                row.classList.add('linha-solene');
+                btn.style.display = 'block';
+                tag.style.display = 'block';
+                divNomes.style.display = 'none';
+            } else {
+                row.classList.remove('linha-solene');
+                btn.style.display = 'none';
+                tag.style.display = 'none';
+                divNomes.style.display = 'flex';
+            }
+        }
+
+        function abrirEscalaSolene(idUnico) {
+            alert("Etapa 2: Modal da Missa Solene");
+        }
+    </script>
+</body>
+</html>

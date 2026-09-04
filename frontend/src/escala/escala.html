@@ -156,7 +156,6 @@
             <div id="lista-membros">
                 <!-- Gerado via JS -->
             </div>
-            <button class="membro-btn" style="text-align: center; background: #eee; font-weight: bold; margin-top: 15px;" onclick="limparFiltro()">Limpar Filtro</button>
         </div>
     </div>
 
@@ -405,7 +404,8 @@
         }
 
         function abrirEscalaSolene(idUnico) {
-            alert("Etapa 2: Modal da Missa Solene");
+            // Salva o ID da missa e redireciona para a tela solene
+            window.location.href = `solenidade.html?missa=${idUnico}`;
         }
     </script>
 </body>

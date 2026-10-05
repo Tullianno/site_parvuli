@@ -63,13 +63,30 @@
         .badge-nome span { cursor: pointer; background: rgba(0,0,0,0.2); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; }
         .contador-badge { float: right; font-size: 0.75rem; background: #ddd; color: #333; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
-        /* --- CLASSE MÁGICA PARA A FOTO --- */
-        .modo-exportacao { box-shadow: none !important; border-radius: 0 !important; }
+        /* --- CLASSE MÁGICA PARA A FOTO EM ALTA RESOLUÇÃO --- */
+        .modo-exportacao {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            /* Um padding super leve apenas para a borda preta da tabela não colar nas quinas da imagem */
+            padding: 15px !important; 
+        }
+        
+        /* Oculta botões, bordas pontilhadas e textos provisórios na hora da foto */
         .modo-exportacao .controles-missa, 
-        .modo-exportacao .btn-solenidade { display: none !important; }
-        .modo-exportacao .text-muted { display: none !important; } /* Esconde o "Toque para escalar" */
-        .modo-exportacao .badge-nome span { display: none !important; } /* Esconde o X do nome */
+        .modo-exportacao .btn-solenidade,
+        .modo-exportacao .text-muted,
+        .modo-exportacao .badge-nome span { display: none !important; }
         .modo-exportacao .area-nomes { border: none !important; background: transparent !important; }
+
+        /* AUMENTO ROBUSTO DAS FONTES PARA MÁXIMA LEITURA */
+        .modo-exportacao table th { font-size: 1.5rem !important; padding: 15px !important; }
+        .modo-exportacao table td { font-size: 1.35rem !important; padding: 15px !important; }
+        .modo-exportacao .linha-liturgica { font-size: 1.45rem !important; padding: 18px !important; }
+        .modo-exportacao .badge-nome { font-size: 1.25rem !important; padding: 8px 16px !important; border-radius: 18px !important; margin: 2px; }
+        .modo-exportacao .tag-solenidade { font-size: 1.3rem !important; margin-bottom: 8px !important; }
+        .modo-exportacao .caixa-tracejada h2 { font-size: 1.8rem !important; }
+        .modo-exportacao .caixa-tracejada p { font-size: 1.4rem !important; }
+        .modo-exportacao .logo-parvuli { width: 110px !important; }
     </style>
 </head>
 <body>
@@ -328,28 +345,46 @@
 
         function abrirEscalaSolene(idUnico) { window.location.href = `solenidade.html?missa=${idUnico}`; }
 
-        // --- SISTEMA DE EXPORTAÇÃO DE IMAGEM ---
+        // --- SISTEMA DEFINITIVO: CAPTURA DINÂMICA COMPLETA EM HD ---
         function baixarImagem() {
             const container = document.getElementById('area-escala');
             const corFundo = document.getElementById('cor-fundo').value;
 
-            // Limpa o fundo atual da tabela para evitar as marcações verdes/vermelhas de disponibilidade
+            // Limpa marcações provisórias de disponibilidade
             document.querySelectorAll('#corpo-escala tr').forEach(tr => tr.classList.remove('pode-ir', 'nao-pode'));
 
-            // Aplica CSS mágico
-            container.classList.add('modo-exportacao');
-            const oldBg = container.style.backgroundColor;
-            container.style.backgroundColor = corFundo;
+            // 1. Cria o clone para manipular livremente sem estragar a tela
+            const clone = container.cloneNode(true);
+            
+            // 2. Aplica as classes da foto (Fontes maiores, remover botões)
+            clone.classList.add('modo-exportacao');
+            clone.style.backgroundColor = corFundo;
+            clone.style.position = 'absolute';
+            clone.style.top = '-9999px'; // Esconde longe da tela
+            clone.style.left = '0';
+            
+            // Fixamos a largura apenas para os textos fluírem de forma bonita (sem espremer os nomes).
+            // A altura deixamos no automático ('auto') para ele crescer e caber todo mundo.
+            clone.style.width = '900px'; 
+            clone.style.height = 'auto'; 
 
-            html2canvas(container, { backgroundColor: corFundo, scale: 2 }).then(canvas => {
+            document.body.appendChild(clone);
+
+            // 3. Tira a foto exata do tamanho do clone, aplicando nitidez 3x
+            html2canvas(clone, { 
+                backgroundColor: corFundo, 
+                scale: 3, 
+                useCORS: true
+            }).then(canvas => {
+                
+                // 4. Salva a imagem diretamente como ela é (completa e adaptável)
                 const link = document.createElement('a');
                 link.download = `Escala_Mensal_${document.getElementById('mes-extenso').innerText}.png`;
-                link.href = canvas.toDataURL('image/png');
+                link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
 
-                // Desfaz as alterações
-                container.classList.remove('modo-exportacao');
-                container.style.backgroundColor = oldBg;
+                // 5. Apaga o clone da memória
+                document.body.removeChild(clone);
             });
         }
     </script>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade - PARVULI</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #8b0000;
+            --border-color: #000;
+            --card-bg: #ffffff;
+            --green: #28a745;
+            --red: #dc3545;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); padding: 15px; padding-bottom: 80px; }
+
+        .header-nav { display: flex; align-items: center; margin-bottom: 15px; }
+        .btn-voltar { text-decoration: none; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: var(--card-bg); padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .dev-login-box { background: #333; color: white; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; }
+        .dev-login-box select { padding: 4px; margin-left: 10px; font-weight: bold; }
+
+        .painel-controle { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .painel-controle h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .form-group select, .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+        .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; font-weight: bold; }
+
+        .modo-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .modo-opcao { flex: 1; padding: 12px; border: 2px solid #ccc; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; background: white; user-select: none; }
+        .modo-opcao strong { display: block; font-size: 1rem; margin-bottom: 3px; }
+        .modo-opcao small { font-size: 0.75rem; color: #555; }
+        
+        .modo-posso.ativo { border-color: var(--green); background: #e8f5e9; color: #155724; }
+        .modo-posso.ativo small { color: #155724; }
+        .modo-nao.ativo { border-color: var(--red); background: #ffebee; color: #721c24; }
+        .modo-nao.ativo small { color: #721c24; }
+
+        .card-fds { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-fds h3 { font-size: 1rem; color: #333; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 12px; text-align: center; }
+        .grid-turnos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        
+        .turno-btn { padding: 15px 5px; border: 2px solid #ccc; border-radius: 8px; background: #f8f9fa; font-weight: bold; text-align: center; cursor: pointer; transition: 0.2s; font-size: 0.9rem; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
+        .turno-btn small { font-size: 0.7rem; font-weight: normal; color: #666; margin-top: 4px; }
+        .turno-btn:hover { background: #e2e3e5; }
+
+        .turno-btn.selecionado-posso { background: var(--green); color: white; border-color: var(--green); }
+        .turno-btn.selecionado-posso small { color: #e8f5e9; }
+        .turno-btn.selecionado-nao { background: var(--red); color: white; border-color: var(--red); }
+        .turno-btn.selecionado-nao small { color: #ffebee; }
+
+        /* Nova Etiqueta de Data */
+        .data-turno { display: inline-block; background: #e2e3e5; color: #444; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-top: 5px; margin-bottom: 2px; font-weight: 800; letter-spacing: 0.5px; }
+        .turno-btn.selecionado-posso .data-turno, .turno-btn.selecionado-nao .data-turno { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .btn-salvar { display: block; width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
+        .btn-salvar:hover { background: #6b0000; }
+    </style>
+</head>
+<body>
+
+    <div class="header-nav"><a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a></div>
+
+    <div class="dev-login-box">
+        🛠️ <strong>Simulador de Permissão:</strong> Logado como: 
+        <select id="simulador-usuario" onchange="trocarUsuarioLogado()">
+            <option value="1">Túlio Rocha (Nível 2 - Admin)</option>
+            <option value="2">Pedro Alves (Nível 2 - Admin)</option>
+            <option value="3">Gigi (Nível 1 - Acólito)</option>
+            <option value="4">João Pedro (Nível 1 - Acólito)</option>
+        </select>
+    </div>
+
+    <main>
+        <div class="painel-controle">
+            <h2>Preencher Disponibilidade</h2>
+            <div class="form-group"><label for="membro-alvo">Preenchendo a escala de:</label><select id="membro-alvo" onchange="carregarDadosDoMembro()"></select></div>
+            <div class="form-group"><label for="mes-selecionado">Mês da Escala:</label><input type="month" id="mes-selecionado" onchange="gerarFinsDeSemana()"></div>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+            <label style="display: block; font-weight: bold; margin-bottom: 10px; color: #333;">Modo de Seleção:</label>
+            <div class="modo-container">
+                <div class="modo-opcao modo-posso" id="btn-modo-posso" onclick="setModo('posso')"><strong>✔️ Os que POSSO</strong><small>O restante será bloqueado</small></div>
+                <div class="modo-opcao modo-nao ativo" id="btn-modo-nao" onclick="setModo('nao_posso')"><strong>❌ Os que NÃO POSSO</strong><small>O restante ficará livre</small></div>
+            </div>
+        </div>
+
+        <div id="container-fds"></div>
+        <button class="btn-salvar" onclick="salvarNoBanco()">💾 Salvar Preferências</button>
+    </main>
+
+    <script>
+        const membrosGeral = [
+            { id: 1, nome: "Túlio Rocha", nivel: 2, indisponivelEm: [] },
+            { id: 2, nome: "Pedro Alves", nivel: 2, indisponivelEm: [] },
+            { id: 3, nome: "Gigi", nivel: 1, indisponivelEm: [] },
+            { id: 4, nome: "João Pedro", nivel: 1, indisponivelEm: [] }
+        ];
+
+        let usuarioLogado = membrosGeral[0]; 
+        let membroSendoEditado = null;
+        let modoAtual = 'nao_posso', turnosSelecionados = new Set(), mapaTurnos = {};
+
+        window.onload = () => {
+            const hoje = new Date();
+            document.getElementById('mes-selecionado').value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+            iniciarTela();
+        };
+
+        function trocarUsuarioLogado() {
+            usuarioLogado = membrosGeral.find(m => m.id === parseInt(document.getElementById('simulador-usuario').value));
+            iniciarTela();
+        }
+
+        function iniciarTela() {
+            const selectAlvo = document.getElementById('membro-alvo');
+            selectAlvo.innerHTML = ''; 
+
+            if (usuarioLogado.nivel === 2) {
+                selectAlvo.disabled = false;
+                membrosGeral.forEach(m => { selectAlvo.innerHTML += `<option value="${m.id}">${m.nome}</option>`; });
+                selectAlvo.value = usuarioLogado.id; 
+            } else {
+                selectAlvo.innerHTML = `<option value="${usuarioLogado.id}">${usuarioLogado.nome}</option>`;
+                selectAlvo.disabled = true; 
+            }
+            carregarDadosDoMembro();
+        }
+
+        function carregarDadosDoMembro() {
+            membroSendoEditado = membrosGeral.find(m => m.id === parseInt(document.getElementById('membro-alvo').value));
+            gerarFinsDeSemana();
+        }
+
+        function setModo(modo, pularLimpeza = false) {
+            modoAtual = modo;
+            document.getElementById('btn-modo-posso').classList.remove('ativo');
+            document.getElementById('btn-modo-nao').classList.remove('ativo');
+            
+            if (modo === 'posso') document.getElementById('btn-modo-posso').classList.add('ativo');
+            else document.getElementById('btn-modo-nao').classList.add('ativo');
+
+            if (!pularLimpeza) turnosSelecionados.clear();
+            atualizarCoresBotoes();
+        }
+
+        function gerarFinsDeSemana() {
+            const container = document.getElementById('container-fds');
+            container.innerHTML = '';
+            mapaTurnos = {}; turnosSelecionados.clear();
+            
+            const mesValue = document.getElementById('mes-selecionado').value;
+            if(!mesValue || !membroSendoEditado) return;
+
+            const [ano, mes] = mesValue.split('-');
+            let diasNoMes = new Date(ano, mes, 0).getDate();
+            let fdsContador = 1;
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                let dataAtual = new Date(ano, mes - 1, dia);
+                let diaSemana = dataAtual.getDay();
+
+                if (diaSemana === 6) {
+                    let dataDomingo = new Date(ano, mes - 1, dia + 1);
+                    container.innerHTML += criarCardFDS(dataAtual, dataDomingo, fdsContador);
+                    fdsContador++;
+                }
+            }
+
+            lerBancoParaTela();
+        }
+
+        function criarCardFDS(dataSabado, dataDomingo, contador) {
+            let html = `<div class="card-fds"><h3>${contador}º Fim de Semana</h3><div class="grid-turnos">`;
+            
+            // Formatando as datas de forma limpa (Ex: 05/09)
+            let strSabado = `${String(dataSabado.getDate()).padStart(2, '0')}/${String(dataSabado.getMonth() + 1).padStart(2, '0')}`;
+            let strDomingo = `${String(dataDomingo.getDate()).padStart(2, '0')}/${String(dataDomingo.getMonth() + 1).padStart(2, '0')}`;
+
+            let idSab = `fds_${contador}_sab`;
+            mapaTurnos[idSab] = [ formatarMissa(dataSabado, "17:00") ];
+            html += `<div class="turno-btn" id="${idSab}" onclick="toggleTurno('${idSab}')">Sábado <span class="data-turno">${strSabado}</span> <small>(17:00)</small></div>`;
+            
+            let idManha = `fds_${contador}_dom_m`;
+            mapaTurnos[idManha] = [ formatarMissa(dataDomingo, "07:30"), formatarMissa(dataDomingo, "10:00") ];
+            html += `<div class="turno-btn" id="${idManha}" onclick="toggleTurno('${idManha}')">Dom. Manhã <span class="data-turno">${strDomingo}</span> <small>(07h e 10h)</small></div>`;
+
+            let idTarde = `fds_${contador}_dom_t`;
+            mapaTurnos[idTarde] = [ formatarMissa(dataDomingo, "17:00"), formatarMissa(dataDomingo, "19:00") ];
+            html += `<div class="turno-btn" id="${idTarde}" onclick="toggleTurno('${idTarde}')">Dom. Tarde <span class="data-turno">${strDomingo}</span> <small>(17h e 19h)</small></div>`;
+            
+            html += `</div></div>`;
+            return html;
+        }
+
+        function formatarMissa(dataObj, horario) {
+            const dia = String(dataObj.getDate()).padStart(2, '0');
+            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            return `${dataObj.getFullYear()}-${mes}-${dia}T${horario}`;
+        }
+
+        function toggleTurno(idBotao) {
+            turnosSelecionados.has(idBotao) ? turnosSelecionados.delete(idBotao) : turnosSelecionados.add(idBotao);
+            atualizarCoresBotoes();
+        }
+
+        function atualizarCoresBotoes() {
+            Object.keys(mapaTurnos).forEach(idBotao => {
+                let btn = document.getElementById(idBotao);
+                if(!btn) return;
+                btn.classList.remove('selecionado-posso', 'selecionado-nao');
+                if (turnosSelecionados.has(idBotao)) btn.classList.add(modoAtual === 'posso' ? 'selecionado-posso' : 'selecionado-nao');
+            });
+        }
+
+        function lerBancoParaTela() {
+            turnosSelecionados.clear();
+            Object.keys(mapaTurnos).forEach(idBotao => {
+                if (mapaTurnos[idBotao].length > 0 && membroSendoEditado.indisponivelEm.includes(mapaTurnos[idBotao][0])) {
+                    turnosSelecionados.add(idBotao);
+                }
+            });
+            setModo('nao_posso', true); 
+        }
+
+        function salvarNoBanco() {
+            let todasMissasVisiveis = [];
+            let missasSelecionadas = [];
+
+            Object.keys(mapaTurnos).forEach(idBotao => {
+                let missasDoTurno = mapaTurnos[idBotao];
+                todasMissasVisiveis.push(...missasDoTurno);
+                if (turnosSelecionados.has(idBotao)) missasSelecionadas.push(...missasDoTurno);
+            });
+
+            let novasIndisponibilidades = modoAtual === 'posso' 
+                ? todasMissasVisiveis.filter(id => !missasSelecionadas.includes(id)) 
+                : missasSelecionadas;
+
+            membroSendoEditado.indisponivelEm = membroSendoEditado.indisponivelEm.filter(id => !todasMissasVisiveis.includes(id));
+            membroSendoEditado.indisponivelEm.push(...novasIndisponibilidades);
+            
+            alert(`Disponibilidade de ${membroSendoEditado.nome} salva com sucesso!`);
+            console.log(membroSendoEditado.indisponivelEm);
+        }
+    </script>
+</body>
+</html>

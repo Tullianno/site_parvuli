@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Escala - PARVULI</title>
-    <!-- Biblioteca para transformar HTML em Imagem -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -63,22 +62,9 @@
         .badge-nome span { cursor: pointer; background: rgba(0,0,0,0.2); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; }
         .contador-badge { float: right; font-size: 0.75rem; background: #ddd; color: #333; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
-        /* --- CLASSE MÁGICA PARA A FOTO EM ALTA RESOLUÇÃO --- */
-        .modo-exportacao {
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            /* Um padding super leve apenas para a borda preta da tabela não colar nas quinas da imagem */
-            padding: 15px !important; 
-        }
-        
-        /* Oculta botões, bordas pontilhadas e textos provisórios na hora da foto */
-        .modo-exportacao .controles-missa, 
-        .modo-exportacao .btn-solenidade,
-        .modo-exportacao .text-muted,
-        .modo-exportacao .badge-nome span { display: none !important; }
+        .modo-exportacao { box-shadow: none !important; border-radius: 0 !important; padding: 15px !important; }
+        .modo-exportacao .controles-missa, .modo-exportacao .btn-solenidade, .modo-exportacao .text-muted, .modo-exportacao .badge-nome span { display: none !important; }
         .modo-exportacao .area-nomes { border: none !important; background: transparent !important; }
-
-        /* AUMENTO ROBUSTO DAS FONTES PARA MÁXIMA LEITURA */
         .modo-exportacao table th { font-size: 1.5rem !important; padding: 15px !important; }
         .modo-exportacao table td { font-size: 1.35rem !important; padding: 15px !important; }
         .modo-exportacao .linha-liturgica { font-size: 1.45rem !important; padding: 18px !important; }
@@ -91,54 +77,30 @@
 </head>
 <body>
 
-    <div class="header-nav">
-        <a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a>
-    </div>
+    <div class="header-nav"><a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a></div>
 
-    <!-- Controles Superiores -->
     <div class="controles-topo">
-        <div>
-            <label for="mes-selecionado">Mês da Escala:</label>
-            <input type="month" id="mes-selecionado" onchange="gerarEscalaDoMes()">
-        </div>
-        <div class="ferramentas-exportacao">
-            <label for="cor-fundo">Fundo:</label>
-            <input type="color" id="cor-fundo" value="#ffffff">
-            <button class="btn-exportar" onclick="baixarImagem()">📸 Salvar Imagem</button>
-        </div>
+        <div><label for="mes-selecionado">Mês da Escala:</label><input type="month" id="mes-selecionado" onchange="gerarEscalaDoMes()"></div>
+        <div class="ferramentas-exportacao"><label for="cor-fundo">Fundo:</label><input type="color" id="cor-fundo" value="#ffffff"><button class="btn-exportar" onclick="baixarImagem()">📸 Salvar Imagem</button></div>
     </div>
 
     <main class="escala-container" id="area-escala">
         <div class="escala-header">
             <img src="../../public/Parvuli_Servi.png" alt="Parvuli Servi" class="logo-parvuli" onerror="this.src='https://via.placeholder.com/120x120?text=Logo'">
-            <div class="caixa-tracejada">
-                <h2>Parvuli Servi</h2>
-                <p>Escala Mensal: <span id="mes-extenso">...</span></p>
-            </div>
+            <div class="caixa-tracejada"><h2>Parvuli Servi</h2><p>Escala Mensal: <span id="mes-extenso">...</span></p></div>
         </div>
 
         <table id="tabela-escala">
-            <thead>
-                <tr>
-                    <th style="width: 25%;">Data</th>
-                    <th style="width: 20%;">Hora</th>
-                    <th style="width: 55%;">Nomes</th>
-                </tr>
-            </thead>
+            <thead><tr><th style="width: 25%;">Data</th><th style="width: 20%;">Hora</th><th style="width: 55%;">Nomes</th></tr></thead>
             <tbody id="corpo-escala"></tbody>
         </table>
     </main>
 
-    <button class="btn-acao-fixa" onclick="abrirModalMembros()" id="btn-verificar">
-        🔍 Verificar Disponibilidade <span>+</span>
-    </button>
+    <button class="btn-acao-fixa" onclick="abrirModalMembros()" id="btn-verificar">🔍 Verificar Disponibilidade <span>+</span></button>
 
     <div class="modal-overlay" id="modalMembros">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Selecione um Membro</h2>
-                <span style="font-size: 1.5rem; cursor: pointer;" onclick="fecharModalMembros()">&times;</span>
-            </div>
+            <div class="modal-header"><h2>Selecione um Membro</h2><span style="font-size: 1.5rem; cursor: pointer;" onclick="fecharModalMembros()">&times;</span></div>
             <div id="lista-membros"></div>
         </div>
     </div>
@@ -150,16 +112,11 @@
             { id: 3, nome: "João Pedro", indisponivelEm: [] }
         ];
 
-        let modoEscalaAtivo = null;
-        let alocacoes = {};
-        let missaFDS = {};
-        let contadorMensal = {};
+        let modoEscalaAtivo = null, alocacoes = {}, missaFDS = {}, contadorMensal = {};
 
         window.onload = () => {
             const hoje = new Date();
-            const ano = hoje.getFullYear();
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            document.getElementById('mes-selecionado').value = `${ano}-${mes}`;
+            document.getElementById('mes-selecionado').value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
             gerarEscalaDoMes();
         };
 
@@ -183,14 +140,10 @@
                 let dataAtual = new Date(ano, mes - 1, dia);
                 let diaSemana = dataAtual.getDay();
 
-                if (dia === 1 && diaSemana === 0) {
-                    renderizarFimDeSemana(null, dataAtual, domingoContador);
-                    domingoContador++;
-                }
-                
+                // FINAIS DE SEMANA AGORA SÃO SEMPRE ANCORADOS NO SÁBADO
                 if (diaSemana === 6) {
                     let dataSabado = dataAtual;
-                    let dataDomingo = new Date(ano, mes - 1, dia + 1);
+                    let dataDomingo = new Date(ano, mes - 1, dia + 1); // Puxa o domingo, mesmo que caia no mês que vem
                     renderizarFimDeSemana(dataSabado, dataDomingo, domingoContador);
                     domingoContador++;
                 }
@@ -225,16 +178,9 @@
             
             tr.innerHTML = `
                 <td>${isPrimeira ? `<strong>${dataStr}</strong>` : ''}</td>
+                <td><strong>${horario}</strong><div class="controles-missa"><label><input type="checkbox" onchange="toggleSolenidade(this, '${idUnico}')"> Solene</label></div></td>
                 <td>
-                    <strong>${horario}</strong>
-                    <div class="controles-missa">
-                        <label><input type="checkbox" onchange="toggleSolenidade(this, '${idUnico}')"> Solene</label>
-                    </div>
-                </td>
-                <td>
-                    <div class="area-nomes" id="nomes_${idUnico}" onclick="clicouMissa('${idUnico}')">
-                        <span class="text-muted">Toque para escalar (0/2)</span>
-                    </div>
+                    <div class="area-nomes" id="nomes_${idUnico}" onclick="clicouMissa('${idUnico}')"><span class="text-muted">Toque para escalar (0/2)</span></div>
                     <span class="tag-solenidade" id="tag_${idUnico}" style="display:none;">SOLENIDADE</span>
                     <button class="btn-solenidade" id="btn_solene_${idUnico}" onclick="abrirEscalaSolene('${idUnico}')">Editar Escala Solene</button>
                 </td>
@@ -262,11 +208,7 @@
             modoEscalaAtivo = membro;
             document.querySelectorAll('#corpo-escala tr').forEach(tr => tr.classList.remove('pode-ir', 'nao-pode'));
             document.querySelectorAll('tr[data-missa-id]').forEach(linha => {
-                if (membro.indisponivelEm.includes(linha.dataset.missaId)) {
-                    linha.classList.add('nao-pode');
-                } else {
-                    linha.classList.add('pode-ir');
-                }
+                linha.classList.add(membro.indisponivelEm.includes(linha.dataset.missaId) ? 'nao-pode' : 'pode-ir');
             });
             document.getElementById('btn-verificar').innerHTML = `Modo Escala: ${membro.nome} <span>(Sair)</span>`;
             document.getElementById('btn-verificar').onclick = limparFiltro;
@@ -277,24 +219,14 @@
             if (!modoEscalaAtivo) { abrirModalMembros(); return; }
             const membro = modoEscalaAtivo;
 
-            if (membro.indisponivelEm.includes(missaId)) {
-                alert(`Bloqueado: ${membro.nome} marcou que não pode neste horário.`); return;
-            }
+            if (membro.indisponivelEm.includes(missaId)) { alert(`Bloqueado: ${membro.nome} marcou que não pode neste horário.`); return; }
             if (!alocacoes[missaId]) alocacoes[missaId] = [];
-            if (alocacoes[missaId].includes(membro.id)) {
-                alert(`${membro.nome} já está escalado nesta missa.`); return;
-            }
-            if (alocacoes[missaId].length >= 2) {
-                alert(`Esta missa já atingiu o limite de 2 acólitos.`); return;
-            }
+            if (alocacoes[missaId].includes(membro.id)) { alert(`${membro.nome} já está escalado nesta missa.`); return; }
+            if (alocacoes[missaId].length >= 2) { alert(`Esta missa já atingiu o limite de 2 acólitos.`); return; }
 
             const fdsDaMissa = missaFDS[missaId];
-            const missasDoMembro = Object.keys(alocacoes).filter(id => alocacoes[id].includes(membro.id));
-            const jaNoFds = missasDoMembro.some(id => missaFDS[id] === fdsDaMissa);
-
-            if (jaNoFds) {
-                const confirma = confirm(`Atenção: ${membro.nome} já está em uma missa neste mesmo fim de semana. Deseja escalar assim mesmo?`);
-                if (!confirma) return;
+            if (Object.keys(alocacoes).filter(id => alocacoes[id].includes(membro.id)).some(id => missaFDS[id] === fdsDaMissa)) {
+                if (!confirm(`Atenção: ${membro.nome} já está em uma missa neste mesmo fim de semana. Deseja escalar assim mesmo?`)) return;
             }
 
             alocacoes[missaId].push(membro.id);
@@ -345,45 +277,28 @@
 
         function abrirEscalaSolene(idUnico) { window.location.href = `solenidade.html?missa=${idUnico}`; }
 
-        // --- SISTEMA DEFINITIVO: CAPTURA DINÂMICA COMPLETA EM HD ---
         function baixarImagem() {
             const container = document.getElementById('area-escala');
             const corFundo = document.getElementById('cor-fundo').value;
 
-            // Limpa marcações provisórias de disponibilidade
             document.querySelectorAll('#corpo-escala tr').forEach(tr => tr.classList.remove('pode-ir', 'nao-pode'));
 
-            // 1. Cria o clone para manipular livremente sem estragar a tela
             const clone = container.cloneNode(true);
-            
-            // 2. Aplica as classes da foto (Fontes maiores, remover botões)
             clone.classList.add('modo-exportacao');
             clone.style.backgroundColor = corFundo;
             clone.style.position = 'absolute';
-            clone.style.top = '-9999px'; // Esconde longe da tela
+            clone.style.top = '-9999px'; 
             clone.style.left = '0';
-            
-            // Fixamos a largura apenas para os textos fluírem de forma bonita (sem espremer os nomes).
-            // A altura deixamos no automático ('auto') para ele crescer e caber todo mundo.
             clone.style.width = '900px'; 
             clone.style.height = 'auto'; 
 
             document.body.appendChild(clone);
 
-            // 3. Tira a foto exata do tamanho do clone, aplicando nitidez 3x
-            html2canvas(clone, { 
-                backgroundColor: corFundo, 
-                scale: 3, 
-                useCORS: true
-            }).then(canvas => {
-                
-                // 4. Salva a imagem diretamente como ela é (completa e adaptável)
+            html2canvas(clone, { backgroundColor: corFundo, scale: 3, useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Escala_Mensal_${document.getElementById('mes-extenso').innerText}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-
-                // 5. Apaga o clone da memória
                 document.body.removeChild(clone);
             });
         }

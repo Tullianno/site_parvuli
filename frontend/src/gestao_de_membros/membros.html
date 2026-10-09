@@ -31,9 +31,13 @@
         .btn-secondary { background-color: #6c757d; }
 
         /* Lista de Membros */
-        .card-membro { background-color: var(--card-bg); border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .card-membro { background-color: var(--card-bg); border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .membro-info { flex: 1 1 auto; min-width: 0; }
         .membro-info h3 { font-size: 1.05rem; margin-bottom: 3px; }
         .membro-info p { font-size: 0.85rem; color: var(--text-muted); }
+        .membro-info h3, .membro-info p { overflow-wrap: anywhere; }
+        .acoes-membro { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+        .btn-excluir { background: none; border: none; color: var(--primary); font-size: 1.2rem; line-height: 1; padding: 6px; cursor: pointer; }
         .badge { background-color: #e2e3e5; color: #383d41; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
 
         /* Modal do Formulário */
@@ -101,6 +105,20 @@
                     <input type="date" id="dataNascimento" class="form-control" required>
                 </div>
 
+                <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--primary); border-bottom: 1px solid #ccc;">🚑 Contato de Emergência</h4>
+                <div class="form-group">
+                    <label for="emergencia-nome">Nome do Contato & Parentesco</label>
+                    <input type="text" id="emergencia-nome" class="form-control" placeholder="Ex: Maria (Mãe)">
+                </div>
+                <div class="form-group">
+                    <label for="emergencia-telefone">Telefone de Emergência</label>
+                    <div class="input-group">
+                        <input type="text" id="emergencia-ddi" class="form-control prefixo-tel" value="+55" placeholder="+55" aria-label="DDI do contato de emergência">
+                        <input type="text" id="emergencia-ddd" class="form-control prefixo-tel" value="61" placeholder="61" aria-label="DDD do contato de emergência">
+                        <input type="tel" id="emergencia-telefone" class="form-control" placeholder="90000-0000" pattern="[0-9]{5}-[0-9]{4}" aria-label="Telefone do contato de emergência">
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="grau">Grau</label>
                     <select id="grau" class="form-control" required>
@@ -146,7 +164,10 @@
                             <p>📞 ${membro.telefone}</p>
                         <p><span class="badge">${membro.grau}</span> - ${membro.funcao}</p>
                     </div>
-                    <button class="btn btn-small" onclick="editarMembro(${membro.id})">Editar</button>
+                    <div class="acoes-membro">
+                        <button class="btn btn-small" onclick="editarMembro(${membro.id})">Editar</button>
+                        <button class="btn-excluir" aria-label="Excluir ${membro.nome}" title="Excluir membro" onclick="excluirMembro(${membro.id})">🗑️</button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -159,6 +180,8 @@
             // Sugestões editáveis
             document.getElementById('ddi').value = '+55';
             document.getElementById('ddd').value = '61';
+            document.getElementById('emergencia-ddi').value = '+55';
+            document.getElementById('emergencia-ddd').value = '61';
             document.getElementById('modalMembro').style.display = 'flex';
         }
 
@@ -171,22 +194,15 @@
             if (membro) {
                 document.getElementById('membroId').value = membro.id;
                 document.getElementById('nome').value = membro.nome;
-                // Tenta separar DDI, DDD e número caso estejam juntos
-                let ddiVal = '+55', dddVal = '61', telVal = membro.telefone;
-                if (membro.telefone) {
-                    const parts = membro.telefone.split(/\s+/);
-                    if (parts.length >= 3) {
-                        ddiVal = parts[0];
-                        dddVal = parts[1];
-                        telVal = parts.slice(2).join(' ');
-                    } else {
-                        // se não tiver DDI/DDD, mantém o telefone como está
-                        telVal = membro.telefone;
-                    }
-                }
+                const { ddi: ddiVal, ddd: dddVal, numero: telVal } = separarTelefone(membro.telefone);
                 document.getElementById('ddi').value = ddiVal;
                 document.getElementById('ddd').value = dddVal;
                 document.getElementById('telefone').value = telVal;
+                document.getElementById('emergencia-nome').value = membro.emergenciaNome || '';
+                const telefoneEmergencia = separarTelefone(membro.emergenciaTelefone);
+                document.getElementById('emergencia-ddi').value = telefoneEmergencia.ddi;
+                document.getElementById('emergencia-ddd').value = telefoneEmergencia.ddd;
+                document.getElementById('emergencia-telefone').value = telefoneEmergencia.numero;
                 document.getElementById('dataNascimento').value = membro.nascimento;
                 document.getElementById('grau').value = membro.grau;
                 document.getElementById('funcao').value = membro.funcao;
@@ -203,11 +219,16 @@
             const ddiVal = document.getElementById('ddi').value.trim() || '+55';
             const dddVal = document.getElementById('ddd').value.trim() || '61';
             const telVal = document.getElementById('telefone').value.trim();
+            const emergenciaDdi = document.getElementById('emergencia-ddi').value.trim() || '+55';
+            const emergenciaDdd = document.getElementById('emergencia-ddd').value.trim() || '61';
+            const emergenciaTel = document.getElementById('emergencia-telefone').value.trim();
 
             const novoMembro = {
                 id: idAtual ? parseInt(idAtual) : Date.now(), // Gera um ID se for novo
                 nome: document.getElementById('nome').value,
                 telefone: `${ddiVal} ${dddVal} ${telVal}`,
+                emergenciaNome: document.getElementById('emergencia-nome').value.trim(),
+                emergenciaTelefone: emergenciaTel ? `${emergenciaDdi} ${emergenciaDdd} ${emergenciaTel}` : '',
                 nascimento: document.getElementById('dataNascimento').value,
                 grau: document.getElementById('grau').value,
                 funcao: document.getElementById('funcao').value
@@ -231,11 +252,21 @@
         // Carrega a lista ao abrir a tela
         window.onload = renderizarLista;
 
-        // Formata o campo de telefone enquanto o usuário digita: 90000-0000
-        const telefoneInput = document.getElementById('telefone');
+        function separarTelefone(telefone) {
+            if (!telefone) {
+                return { ddi: '+55', ddd: '61', numero: '' };
+            }
+
+            const partes = telefone.trim().split(/\s+/);
+            if (partes.length >= 3) {
+                return { ddi: partes[0], ddd: partes[1], numero: partes.slice(2).join(' ') };
+            }
+
+            return { ddi: '+55', ddd: '61', numero: telefone };
+        }
+
         function formatTelefoneInput(e) {
             const el = e.target;
-            const cursorPos = el.selectionStart;
             let digits = el.value.replace(/\D/g, '');
             if (digits.length > 9) digits = digits.slice(0, 9);
             if (digits.length > 5) {
@@ -246,17 +277,32 @@
             // move caret to end for simplicity
             el.selectionStart = el.selectionEnd = el.value.length;
         }
-        telefoneInput.addEventListener('input', formatTelefoneInput);
-        telefoneInput.addEventListener('paste', function(e) {
+        function formatTelefoneColado(e) {
             e.preventDefault();
             const paste = (e.clipboardData || window.clipboardData).getData('text');
-            const digits = paste.replace(/\D/g, '').slice(0,9);
-            if (digits.length > 5) {
-                this.value = digits.slice(0,5) + '-' + digits.slice(5);
-            } else {
-                this.value = digits;
-            }
+            const digits = paste.replace(/\D/g, '').slice(0, 9);
+            e.target.value = digits.length > 5
+                ? digits.slice(0, 5) + '-' + digits.slice(5)
+                : digits;
+        }
+
+        [document.getElementById('telefone'), document.getElementById('emergencia-telefone')].forEach(input => {
+            input.addEventListener('input', formatTelefoneInput);
+            input.addEventListener('paste', formatTelefoneColado);
         });
+
+        function excluirMembro(id) {
+            const membro = membrosDB.find(m => m.id === id);
+            if (!membro) {
+                return;
+            }
+
+            if(confirm(`🚨 CUIDADO: Tem certeza que deseja excluir o membro "${membro.nome}" do sistema?\n\nIsso apagará o histórico de escalas e frequência dele.`)) {
+                membrosDB = membrosDB.filter(m => m.id !== id);
+                renderizarLista();
+                alert(`Membro excluído com sucesso.`);
+            }
+        }
     </script>
 </body>
 </html>

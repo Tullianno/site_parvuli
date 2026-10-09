@@ -13,6 +13,8 @@
             --green-light: #d4edda;
             --red-light: #f8d7da;
             --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -80,8 +82,17 @@
     <div class="header-nav"><a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a></div>
 
     <div class="controles-topo">
-        <div><label for="mes-selecionado">Mês da Escala:</label><input type="month" id="mes-selecionado" onchange="gerarEscalaDoMes()"></div>
-        <div class="ferramentas-exportacao"><label for="cor-fundo">Fundo:</label><input type="color" id="cor-fundo" value="#ffffff"><button class="btn-exportar" onclick="baixarImagem()">📸 Salvar Imagem</button></div>
+        <div>
+            <label for="mes-selecionado">Mês da Escala:</label>
+            <input type="month" id="mes-selecionado" onchange="gerarEscalaDoMes()">
+        </div>
+        <div class="ferramentas-exportacao" style="gap: 8px; flex-wrap: wrap; justify-content: center;">
+            <label for="cor-fundo">Fundo:</label>
+            <input type="color" id="cor-fundo" value="#ffffff" style="margin-right: 10px;">
+            <button class="btn-exportar" onclick="baixarImagem()">📸 Baixar Img</button>
+            <button class="btn-exportar" style="background: var(--success);" onclick="salvarAlteracoes()">💾 Salvar</button>
+            <button class="btn-exportar" style="background: var(--warning); color: #333;" onclick="publicarEscala()">📢 Publicar</button>
+        </div>
     </div>
 
     <main class="escala-container" id="area-escala">
@@ -301,6 +312,20 @@
                 link.click();
                 document.body.removeChild(clone);
             });
+        }
+
+        function salvarAlteracoes() {
+            // "alocacoes" e "missaFDS" já contêm o estado atual da tela
+            console.log("Salvando no BD...", alocacoes);
+            alert("💾 Alterações salvas como rascunho com sucesso!");
+        }
+
+        function publicarEscala() {
+            const mesExtenso = document.getElementById('mes-extenso').innerText;
+            if(confirm(`Deseja notificar todos os membros que a escala de ${mesExtenso} está finalizada e publicada?`)) {
+                // Aqui iria a lógica para enviar o "Aviso" automático no mural
+                alert("📢 Escala publicada! Os membros receberão uma notificação no Quadro de Avisos.");
+            }
         }
     </script>
 </body>

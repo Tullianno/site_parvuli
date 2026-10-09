@@ -88,10 +88,21 @@
             <span class="seta-indicador">›</span>
         </div>
 
-        <div class="card">
-            <h2>Próxima Missa</h2>
-            <p>15 de Outubro - Domingo, 19:00</p>
-            <p class="destaque">Função: Turíbulo</p>
+        <!-- STATUS DE PREENCHIMENTO (Abaixo do Quadro de Avisos) -->
+        <div class="card" style="border-left: 4px solid var(--info); padding: 10px 15px;">
+            <p style="font-size: 0.9rem;" id="status-preenchimento">
+                <strong>Disponibilidade (Próximo Mês):</strong> Faltam 3 membros preencherem.
+            </p>
+        </div>
+
+        <!-- PRÓXIMA MISSA INTERATIVA -->
+        <div class="card card-clicavel" onclick="abrirDetalhesMissa()">
+            <div style="padding-right: 30px;">
+                <h2>Sua Próxima Missa</h2>
+                <p>15 de Outubro - Domingo, 19:00</p>
+                <p class="destaque">Função: Turíbulo</p>
+            </div>
+            <span class="seta-indicador">›</span>
         </div>
 
         <div class="card">
@@ -143,6 +154,34 @@
             <button class="fechar-modal" onclick="fecharModal('modal-avisos')">&times;</button>
             <h3 class="titulo-modal">Mural de Notificações</h3>
             <div id="lista-avisos-modal"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALHES DA MISSA -->
+    <div class="modal-overlay" id="modal-missa">
+        <div class="modal-content">
+            <button class="fechar-modal" onclick="fecharModal('modal-missa')">&times;</button>
+            <h3 class="titulo-modal">Detalhes da Escala</h3>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); margin-bottom: 15px;">
+                <p style="font-weight: bold; font-size: 1.1rem; color: #222; margin-bottom: 5px;">15 de Outubro (Domingo)</p>
+                <p style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">19:00</p>
+            </div>
+
+            <h4 style="font-size: 0.95rem; color: #555; margin-bottom: 10px;">Equipe Escalada:</h4>
+            
+            <div class="item-lista" style="border-left-color: var(--primary);">
+                <span class="item-titulo">Túlio Rocha</span>
+                <span class="item-data">Função: Turíbulo</span>
+            </div>
+            <div class="item-lista" style="border-left-color: #ccc;">
+                <span class="item-titulo">Pedro Alves</span>
+                <span class="item-data">Função: Cerimoniário</span>
+            </div>
+            <div class="item-lista" style="border-left-color: #ccc;">
+                <span class="item-titulo">Gigi</span>
+                <span class="item-data">Função: Cruciferário</span>
+            </div>
         </div>
     </div>
 
@@ -241,6 +280,22 @@
                     </div>`;
             });
             document.getElementById('modal-avisos').style.display = 'flex';
+        }
+
+        function abrirDetalhesMissa() {
+            document.getElementById('modal-missa').style.display = 'flex';
+        }
+
+        // Simulação da verificação de quem falta preencher
+        function verificarStatusPreenchimento() {
+            const faltam = ["Marcos", "Pedro", "Tiago"]; // Simulação do Banco
+            const elStatus = document.getElementById('status-preenchimento');
+            
+            if (faltam.length > 0) {
+                elStatus.innerHTML = `<strong style="color: var(--danger);">Atenção:</strong> Faltam preencher a disponibilidade: ${faltam.join(', ')}.`;
+            } else {
+                elStatus.innerHTML = `<strong style="color: var(--success);">Tudo certo!</strong> Todos os membros já preencheram a disponibilidade.`;
+            }
         }
     </script>
 </body>

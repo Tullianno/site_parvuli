@@ -14,6 +14,7 @@
             --text-muted: #777777;
             --success: #28a745;
             --warning: #ffc107;
+            --danger: #dc3545;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -34,6 +35,11 @@
         .destaque { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
         .saldo { font-size: 1.5rem; font-weight: bold; color: var(--success); }
 
+        /* Cartão Clicável (Interativo) */
+        .card-clicavel { cursor: pointer; transition: 0.2s; position: relative; }
+        .card-clicavel:active { transform: scale(0.98); background-color: #fafafa; }
+        .seta-indicador { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.8rem; color: #ccc; }
+
         /* Botões */
         .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; margin-bottom: 10px; }
         .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
@@ -49,6 +55,27 @@
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
+
+        /* ===== MODAL DE HISTÓRICO FINANCEIRO ===== */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: var(--bg-color); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .fechar-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: #555; cursor: pointer; }
+        
+        .titulo-modal { font-size: 1.1rem; color: var(--text-main); margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px; font-weight: bold; }
+
+        .transacao-card { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid; margin-bottom: 10px; }
+        .transacao-card.entrada { border-left-color: var(--success); background-color: #e8f5e9; }
+        .transacao-card.saida { border-left-color: var(--danger); background-color: #ffebee; }
+        
+        .transacao-info { display: flex; flex-direction: column; gap: 4px; }
+        .transacao-info .nome { font-weight: bold; font-size: 0.95rem; color: #222; }
+        .transacao-info .data { font-size: 0.75rem; color: #666; }
+        
+        .transacao-valores .valor { font-weight: bold; font-size: 1rem; }
+        .transacao-card.entrada .valor { color: var(--success); }
+        .transacao-card.saida .valor { color: var(--danger); }
+        
+        .vazio { text-align: center; color: #888; padding: 20px; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -72,10 +99,14 @@
             <a href="../escala/escala.html" class="btn btn-outline">Gerar Escalas do Mês</a>
         </div>
 
-        <div class="card">
-            <h2>Resumo Financeiro</h2>
-            <p>Saldo Atual do Grupo</p>
-            <p class="saldo">R$ 345,50</p>
+        <!-- NOVO RESUMO FINANCEIRO INTERATIVO -->
+        <div class="card card-clicavel" onclick="abrirHistoricoCaixa()">
+            <div style="padding-right: 30px;">
+                <h2>Resumo Financeiro</h2>
+                <p style="font-size: 0.9rem; color: #555;">Saldo Atual do Grupo</p>
+                <p class="saldo" id="dashboard-saldo">R$ 0,00</p>
+            </div>
+            <span class="seta-indicador">›</span>
         </div>
 
         <!-- Exclusivo para Nível 2 (Coordenação) -->
@@ -88,7 +119,7 @@
             <h2>Painel de Gestão</h2>
             <div class="admin-grid">
                 <a href="../gestao_de_membros/membros.html" class="btn btn-outline" role="button">👤 Gerir Membros</a>
-                <button class="btn btn-outline">💰 Editar Caixa</button>
+                <a href="../editar_caixa/editar_caixa.html" class="btn btn-outline" role="button">💰 Editar Caixa</a>
                 <button class="btn btn-outline">📊 Ver Frequência</button>
             </div>
         </div>
@@ -100,28 +131,92 @@
         <a href="#" class="nav-item">Perfil</a>
     </nav>
 
+    <!-- MODAL DO HISTÓRICO FINANCEIRO (Somente Leitura) -->
+    <div class="modal-overlay" id="modal-historico">
+        <div class="modal-content">
+            <button class="fechar-modal" onclick="fecharHistoricoCaixa()">&times;</button>
+            <h3 class="titulo-modal">Extrato do Caixa</h3>
+            <div id="lista-historico">
+                <!-- Preenchido via Javascript -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // Simulador de Login - Mude este valor para testar
         // 1 = Acólito Comum | 2 = Coordenador/Admin
         const nivelUsuario = 2; 
+
+        // Banco de Dados Simulado do Caixa (Mesmo do editar_caixa)
+        let transacoesGlobais = [
+            { id: 1, tipo: 'entrada', nome: 'Doação Anônima', valor: 150.00, data: '08/10/2026' },
+            { id: 2, tipo: 'saida', nome: 'Compra de Carvão e Incenso', valor: 45.50, data: '05/10/2026' },
+            { id: 3, tipo: 'entrada', nome: 'Venda de Rifa', valor: 241.00, data: '01/10/2026' }
+        ];
+
+        window.onload = () => {
+            configurarPainel();
+            calcularSaldoDashboard();
+        };
 
         function configurarPainel() {
             const adminElements = document.querySelectorAll('.nivel-2-only');
             const saudacao = document.getElementById('saudacao-usuario');
 
             if (nivelUsuario === 2) {
-                // Mostra as ferramentas de coordenação
                 adminElements.forEach(el => el.style.display = 'block');
                 saudacao.innerText = "Olá, Coordenador(a)";
             } else {
-                // Garante que ferramentas de coordenação fiquem ocultas
                 adminElements.forEach(el => el.style.display = 'none');
                 saudacao.innerText = "Olá, Acólito";
             }
         }
 
-        // Executa a verificação ao carregar a página
-        window.onload = configurarPainel;
+        // Calcula o saldo somando/subtraindo o banco de dados simulado
+        function calcularSaldoDashboard() {
+            let saldo = 0;
+            transacoesGlobais.forEach(t => {
+                if (t.tipo === 'entrada') saldo += t.valor;
+                else saldo -= t.valor;
+            });
+            
+            // Pinta de vermelho se o saldo for negativo
+            const elSaldo = document.getElementById('dashboard-saldo');
+            elSaldo.innerText = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (saldo < 0) { elSaldo.style.color = "var(--danger)"; }
+        }
+
+        // Abre a janela sobreposta desenhando o histórico
+        function abrirHistoricoCaixa() {
+            const container = document.getElementById('lista-historico');
+            container.innerHTML = '';
+            
+            if (transacoesGlobais.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhuma movimentação registrada.</div>';
+            } else {
+                [...transacoesGlobais].reverse().forEach(t => {
+                    const sinal = t.tipo === 'entrada' ? '+' : '-';
+                    const htmlCard = `
+                        <div class="transacao-card ${t.tipo}">
+                            <div class="transacao-info">
+                                <span class="nome">${t.nome}</span>
+                                <span class="data">${t.data}</span>
+                            </div>
+                            <div class="transacao-valores">
+                                <span class="valor">${sinal} ${t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += htmlCard;
+                });
+            }
+
+            document.getElementById('modal-historico').style.display = 'flex';
+        }
+
+        function fecharHistoricoCaixa() {
+            document.getElementById('modal-historico').style.display = 'none';
+        }
     </script>
 </body>
 </html>

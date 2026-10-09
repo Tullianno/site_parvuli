@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerir Avisos - PARVULI</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #8b0000;
+            --card-bg: #ffffff;
+            --text-dark: #333;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --danger: #dc3545;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); padding: 15px; padding-bottom: 80px; color: var(--text-dark); }
+
+        .header-nav { display: flex; align-items: center; margin-bottom: 15px; }
+        .btn-voltar { text-decoration: none; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: var(--card-bg); padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* Formulário de Criação */
+        .painel-form { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .painel-form h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        
+        .tipo-aviso-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-tipo { flex: 1; padding: 12px 5px; border: 2px solid #ccc; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 0.9rem; background: #f8f9fa; color: #555; transition: 0.2s; }
+        
+        .btn-tipo.ativo-geral { border-color: var(--warning); background: #fffdf5; color: #856404; }
+        .btn-tipo.ativo-escala { border-color: var(--info); background: #e2fbfd; color: #0c5460; }
+
+        .grupo-input { margin-bottom: 15px; }
+        .grupo-input label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        .grupo-input input, .grupo-input textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; outline: none; }
+        .grupo-input input:focus, .grupo-input textarea:focus { border-color: var(--primary); }
+        .grupo-input textarea { resize: vertical; min-height: 80px; }
+
+        .btn-publicar { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
+        .btn-publicar:hover { background: #6b0000; }
+
+        /* Lista de Avisos Ativos */
+        .historico-titulo { font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px; font-weight: bold; }
+        .aviso-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid; margin-bottom: 12px; position: relative; }
+        .aviso-card.geral { border-left-color: var(--warning); }
+        .aviso-card.escala { border-left-color: var(--info); background-color: #f7fdfd; }
+        
+        .aviso-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .aviso-titulo { font-weight: bold; font-size: 1rem; color: #222; padding-right: 30px; }
+        .aviso-data { font-size: 0.75rem; color: #666; display: block; margin-bottom: 8px; }
+        .aviso-texto { font-size: 0.9rem; color: #444; line-height: 1.4; }
+
+        .btn-excluir { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #999; font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .btn-excluir:hover { color: var(--danger); }
+        
+        .vazio { text-align: center; color: #888; padding: 20px; font-style: italic; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header-nav">
+        <a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a>
+    </div>
+
+    <main>
+        <!-- Painel de Publicação -->
+        <div class="painel-form">
+            <h2>Criar Novo Aviso</h2>
+            
+            <div class="tipo-aviso-container">
+                <div class="btn-tipo ativo-geral" id="btn-tipo-geral" onclick="selecionarTipo('geral')">📢 Aviso Geral</div>
+                <div class="btn-tipo" id="btn-tipo-escala" onclick="selecionarTipo('escala')">📅 Abertura de Escala</div>
+            </div>
+
+            <div class="grupo-input">
+                <label for="input-titulo">Título da Notificação</label>
+                <input type="text" id="input-titulo" placeholder="Ex: Reunião Sábado, Ensaio Adiado...">
+            </div>
+
+            <div class="grupo-input">
+                <label for="input-mensagem">Mensagem</label>
+                <textarea id="input-mensagem" placeholder="Escreva os detalhes do aviso aqui..."></textarea>
+            </div>
+
+            <button class="btn-publicar" onclick="publicarAviso()">📢 Publicar para o Grupo</button>
+        </div>
+
+        <!-- Avisos Ativos -->
+        <div class="historico-titulo">Avisos Publicados</div>
+        <div id="lista-avisos">
+            <!-- Renderizado via JS -->
+        </div>
+    </main>
+
+    <script>
+        // Banco de Dados Simulado
+        let avisosGlobais = [
+            { id: 1, tipo: 'escala', titulo: 'Preenchimento de Escala Aberto!', mensagem: 'A escala do próximo mês já está liberada. Por favor, preencham a disponibilidade de vocês no sistema até sexta-feira.', data: '08/10/2026' },
+            { id: 2, tipo: 'geral', titulo: 'Reunião Sábado', mensagem: 'Teremos formação obrigatória neste sábado às 15h. Não faltem.', data: '05/10/2026' }
+        ];
+
+        let tipoSelecionado = 'geral';
+
+        window.onload = () => {
+            renderizarAvisos();
+        };
+
+        // Atalhos de Texto para "Abertura de Escala"
+        function selecionarTipo(tipo) {
+            tipoSelecionado = tipo;
+            const btnGeral = document.getElementById('btn-tipo-geral');
+            const btnEscala = document.getElementById('btn-tipo-escala');
+            const inputTitulo = document.getElementById('input-titulo');
+            const inputMensagem = document.getElementById('input-mensagem');
+
+            btnGeral.classList.remove('ativo-geral');
+            btnEscala.classList.remove('ativo-escala');
+
+            if (tipo === 'geral') {
+                btnGeral.classList.add('ativo-geral');
+                inputTitulo.value = '';
+                inputMensagem.value = '';
+            } else {
+                btnEscala.classList.add('ativo-escala');
+                // Preenche automaticamente o texto padrão
+                inputTitulo.value = 'Preenchimento de Escala Aberto!';
+                inputMensagem.value = 'A escala do próximo mês já está liberada. Por favor, entre na sua aba "Disponibilidade" e marque seus dias o mais rápido possível.';
+            }
+        }
+
+        // Função de Publicação
+        function publicarAviso() {
+            const titulo = document.getElementById('input-titulo').value.trim();
+            const mensagem = document.getElementById('input-mensagem').value.trim();
+
+            if (!titulo || !mensagem) {
+                alert("Por favor, preencha o título e a mensagem.");
+                return;
+            }
+
+            const hoje = new Date();
+            const dataFormatada = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
+
+            const novoAviso = {
+                id: Date.now(),
+                tipo: tipoSelecionado,
+                titulo: titulo,
+                mensagem: mensagem,
+                data: dataFormatada
+            };
+
+            // Adiciona no início da lista (mais recente primeiro)
+            avisosGlobais.unshift(novoAviso);
+            
+            // Limpa o form e volta pro geral
+            selecionarTipo('geral');
+            renderizarAvisos();
+            alert("✅ Aviso publicado e disponível no mural!");
+        }
+
+        function excluirAviso(id) {
+            if(confirm("Tem certeza que deseja apagar este aviso? Ele sumirá do mural de todos os membros.")) {
+                avisosGlobais = avisosGlobais.filter(a => a.id !== id);
+                renderizarAvisos();
+            }
+        }
+
+        // Renderização na Tela
+        function renderizarAvisos() {
+            const container = document.getElementById('lista-avisos');
+            container.innerHTML = '';
+
+            if (avisosGlobais.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhum aviso ativo.</div>';
+                return;
+            }
+
+            avisosGlobais.forEach(a => {
+                const icone = a.tipo === 'escala' ? '📅' : '📢';
+                container.innerHTML += `
+                    <div class="aviso-card ${a.tipo}">
+                        <button class="btn-excluir" onclick="excluirAviso(${a.id})" title="Apagar">🗑️</button>
+                        <div class="aviso-header">
+                            <div class="aviso-titulo">${icone} ${a.titulo}</div>
+                        </div>
+                        <span class="aviso-data">Publicado em ${a.data}</span>
+                        <div class="aviso-texto">${a.mensagem}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

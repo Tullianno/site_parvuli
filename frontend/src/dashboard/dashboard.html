@@ -5,76 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PARVULI - Dashboard</title>
     <style>
-        /* Variáveis de Cores e Estilo Básico (Mobile-First) */
         :root {
             --bg-color: #f4f6f9;
             --card-bg: #ffffff;
-            --primary: #8b0000; /* Vermelho litúrgico */
+            --primary: #8b0000;
             --text-main: #333333;
             --text-muted: #777777;
             --success: #28a745;
             --warning: #ffc107;
             --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
 
-        /* Cabeçalho */
         header { background-color: var(--primary); color: white; padding: 20px; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; }
         header h1 { font-size: 1.2rem; }
         header p { font-size: 0.9rem; opacity: 0.8; }
 
-        /* Container Principal */
         main { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* Estilo dos Cartões (Cards) */
         .card { background-color: var(--card-bg); border-radius: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .card h2 { font-size: 1rem; color: var(--text-muted); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
         .destaque { font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
         .saldo { font-size: 1.5rem; font-weight: bold; color: var(--success); }
 
-        /* Cartão Clicável (Interativo) */
         .card-clicavel { cursor: pointer; transition: 0.2s; position: relative; }
         .card-clicavel:active { transform: scale(0.98); background-color: #fafafa; }
         .seta-indicador { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 1.8rem; color: #ccc; }
 
-        /* Botões */
-        .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; margin-bottom: 10px; }
+        .btn { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; margin-bottom: 10px; text-decoration: none; }
         .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
         
-        /* Grid para Menus Admin */
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .admin-grid .btn { font-size: 0.85rem; padding: 15px 5px; }
 
-        /* Classe para ocultar elementos baseados no Nível de Acesso */
         .nivel-2-only { display: none; }
 
-        /* Barra de Navegação Inferior */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
 
-        /* ===== MODAL DE HISTÓRICO FINANCEIRO ===== */
+        /* MODAIS GERAIS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-content { background: var(--bg-color); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .fechar-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; color: #555; cursor: pointer; }
-        
         .titulo-modal { font-size: 1.1rem; color: var(--text-main); margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 10px; font-weight: bold; }
 
-        .transacao-card { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid; margin-bottom: 10px; }
-        .transacao-card.entrada { border-left-color: var(--success); background-color: #e8f5e9; }
-        .transacao-card.saida { border-left-color: var(--danger); background-color: #ffebee; }
+        /* ESTILOS ESPECÍFICOS DE LISTAS NO MODAL */
+        .item-lista { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid; margin-bottom: 10px; }
         
-        .transacao-info { display: flex; flex-direction: column; gap: 4px; }
-        .transacao-info .nome { font-weight: bold; font-size: 0.95rem; color: #222; }
-        .transacao-info .data { font-size: 0.75rem; color: #666; }
+        .caixa-entrada { border-left-color: var(--success); background-color: #e8f5e9; }
+        .caixa-saida { border-left-color: var(--danger); background-color: #ffebee; }
         
-        .transacao-valores .valor { font-weight: bold; font-size: 1rem; }
-        .transacao-card.entrada .valor { color: var(--success); }
-        .transacao-card.saida .valor { color: var(--danger); }
+        .aviso-geral { border-left-color: var(--warning); }
+        .aviso-escala { border-left-color: var(--info); background-color: #e2fbfd; }
         
+        .item-titulo { font-weight: bold; font-size: 0.95rem; color: #222; margin-bottom: 4px; }
+        .item-data { font-size: 0.75rem; color: #666; display: block; margin-bottom: 6px; }
+        .item-texto { font-size: 0.9rem; color: #444; line-height: 1.4; }
         .vazio { text-align: center; color: #888; padding: 20px; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
@@ -82,11 +73,21 @@
 
     <header>
         <h1>PARVULI</h1>
-        <p id="saudacao-usuario">Olá, João (Acólito)</p>
+        <p id="saudacao-usuario">Olá, Acólito</p>
     </header>
 
     <main>
         <!-- Visível para Nível 1 e 2 -->
+        <div class="card card-clicavel" style="border-left: 4px solid var(--warning);" onclick="abrirModalAvisos()">
+            <div style="padding-right: 30px;">
+                <h2>Quadro de Avisos</h2>
+                <div id="preview-avisos">
+                    <p style="font-size: 0.9rem; color: #555;">Carregando avisos recentes...</p>
+                </div>
+            </div>
+            <span class="seta-indicador">›</span>
+        </div>
+
         <div class="card">
             <h2>Próxima Missa</h2>
             <p>15 de Outubro - Domingo, 19:00</p>
@@ -99,7 +100,7 @@
             <a href="../escala/escala.html" class="btn btn-outline">Gerar Escalas do Mês</a>
         </div>
 
-        <!-- NOVO RESUMO FINANCEIRO INTERATIVO -->
+        <!-- Resumo Financeiro Interativo -->
         <div class="card card-clicavel" onclick="abrirHistoricoCaixa()">
             <div style="padding-right: 30px;">
                 <h2>Resumo Financeiro</h2>
@@ -110,17 +111,13 @@
         </div>
 
         <!-- Exclusivo para Nível 2 (Coordenação) -->
-        <div class="card nivel-2-only" style="border-left: 4px solid var(--warning);">
-            <h2>Avisos da Coordenação</h2>
-            <p><strong>Faltam preencher disponibilidade:</strong><br> Marcos, Pedro, Tiago.</p>
-        </div>
-
         <div class="card nivel-2-only">
             <h2>Painel de Gestão</h2>
             <div class="admin-grid">
+                <a href="../avisos/avisos.html" class="btn btn-outline" role="button">📢 Gerir Avisos</a>
                 <a href="../gestao_de_membros/membros.html" class="btn btn-outline" role="button">👤 Gerir Membros</a>
                 <a href="../editar_caixa/editar_caixa.html" class="btn btn-outline" role="button">💰 Editar Caixa</a>
-                <button class="btn btn-outline">📊 Ver Frequência</button>
+                <a href="../frequencia/frequencia.html" class="btn btn-outline" role="button">📊 Ver Frequência</a>
             </div>
         </div>
     </main>
@@ -131,32 +128,43 @@
         <a href="#" class="nav-item">Perfil</a>
     </nav>
 
-    <!-- MODAL DO HISTÓRICO FINANCEIRO (Somente Leitura) -->
+    <!-- MODAL DO HISTÓRICO FINANCEIRO -->
     <div class="modal-overlay" id="modal-historico">
         <div class="modal-content">
-            <button class="fechar-modal" onclick="fecharHistoricoCaixa()">&times;</button>
+            <button class="fechar-modal" onclick="fecharModal('modal-historico')">&times;</button>
             <h3 class="titulo-modal">Extrato do Caixa</h3>
-            <div id="lista-historico">
-                <!-- Preenchido via Javascript -->
-            </div>
+            <div id="lista-historico"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DO QUADRO DE AVISOS -->
+    <div class="modal-overlay" id="modal-avisos">
+        <div class="modal-content">
+            <button class="fechar-modal" onclick="fecharModal('modal-avisos')">&times;</button>
+            <h3 class="titulo-modal">Mural de Notificações</h3>
+            <div id="lista-avisos-modal"></div>
         </div>
     </div>
 
     <script>
-        // Simulador de Login - Mude este valor para testar
-        // 1 = Acólito Comum | 2 = Coordenador/Admin
-        const nivelUsuario = 2; 
+        // Simulador de Login
+        const nivelUsuario = 2; // 1 = Acólito Comum | 2 = Coordenação
 
-        // Banco de Dados Simulado do Caixa (Mesmo do editar_caixa)
+        // Simulação de Banco de Dados
         let transacoesGlobais = [
             { id: 1, tipo: 'entrada', nome: 'Doação Anônima', valor: 150.00, data: '08/10/2026' },
-            { id: 2, tipo: 'saida', nome: 'Compra de Carvão e Incenso', valor: 45.50, data: '05/10/2026' },
-            { id: 3, tipo: 'entrada', nome: 'Venda de Rifa', valor: 241.00, data: '01/10/2026' }
+            { id: 2, tipo: 'saida', nome: 'Compra de Carvão', valor: 45.50, data: '05/10/2026' }
+        ];
+
+        let avisosGlobais = [
+            { id: 1, tipo: 'escala', titulo: 'Preenchimento de Escala Aberto!', mensagem: 'A escala do próximo mês já está liberada. Por favor, preencham a disponibilidade de vocês no sistema até sexta-feira.', data: '08/10/2026' },
+            { id: 2, tipo: 'geral', titulo: 'Reunião Sábado', mensagem: 'Teremos formação obrigatória neste sábado às 15h. Não faltem.', data: '05/10/2026' }
         ];
 
         window.onload = () => {
             configurarPainel();
             calcularSaldoDashboard();
+            carregarPreviewAvisos();
         };
 
         function configurarPainel() {
@@ -165,57 +173,74 @@
 
             if (nivelUsuario === 2) {
                 adminElements.forEach(el => el.style.display = 'block');
-                saudacao.innerText = "Olá, Coordenador(a)";
+                saudacao.innerText = "Olá, Coordenação";
             } else {
                 adminElements.forEach(el => el.style.display = 'none');
                 saudacao.innerText = "Olá, Acólito";
             }
         }
 
-        // Calcula o saldo somando/subtraindo o banco de dados simulado
-        function calcularSaldoDashboard() {
-            let saldo = 0;
-            transacoesGlobais.forEach(t => {
-                if (t.tipo === 'entrada') saldo += t.valor;
-                else saldo -= t.valor;
-            });
-            
-            // Pinta de vermelho se o saldo for negativo
-            const elSaldo = document.getElementById('dashboard-saldo');
-            elSaldo.innerText = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            if (saldo < 0) { elSaldo.style.color = "var(--danger)"; }
+        function fecharModal(idModal) {
+            document.getElementById(idModal).style.display = 'none';
         }
 
-        // Abre a janela sobreposta desenhando o histórico
+        // --- LÓGICA DO CAIXA ---
+        function calcularSaldoDashboard() {
+            let saldo = 0;
+            transacoesGlobais.forEach(t => { if (t.tipo === 'entrada') saldo += t.valor; else saldo -= t.valor; });
+            const elSaldo = document.getElementById('dashboard-saldo');
+            elSaldo.innerText = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (saldo < 0) elSaldo.style.color = "var(--danger)";
+        }
+
         function abrirHistoricoCaixa() {
             const container = document.getElementById('lista-historico');
-            container.innerHTML = '';
+            container.innerHTML = transacoesGlobais.length === 0 ? '<div class="vazio">Nenhuma movimentação.</div>' : '';
             
-            if (transacoesGlobais.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhuma movimentação registrada.</div>';
-            } else {
-                [...transacoesGlobais].reverse().forEach(t => {
-                    const sinal = t.tipo === 'entrada' ? '+' : '-';
-                    const htmlCard = `
-                        <div class="transacao-card ${t.tipo}">
-                            <div class="transacao-info">
-                                <span class="nome">${t.nome}</span>
-                                <span class="data">${t.data}</span>
-                            </div>
-                            <div class="transacao-valores">
-                                <span class="valor">${sinal} ${t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            </div>
+            [...transacoesGlobais].reverse().forEach(t => {
+                const classeCor = t.tipo === 'entrada' ? 'caixa-entrada' : 'caixa-saida';
+                const sinal = t.tipo === 'entrada' ? '+' : '-';
+                container.innerHTML += `
+                    <div class="item-lista ${classeCor}">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="item-titulo">${t.nome}</span>
+                            <span style="font-weight:bold;">${sinal} ${t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                         </div>
-                    `;
-                    container.innerHTML += htmlCard;
-                });
-            }
-
+                        <span class="item-data">${t.data}</span>
+                    </div>`;
+            });
             document.getElementById('modal-historico').style.display = 'flex';
         }
 
-        function fecharHistoricoCaixa() {
-            document.getElementById('modal-historico').style.display = 'none';
+        // --- LÓGICA DOS AVISOS ---
+        function carregarPreviewAvisos() {
+            const preview = document.getElementById('preview-avisos');
+            if (avisosGlobais.length === 0) {
+                preview.innerHTML = '<p style="font-size: 0.9rem; color: #777;">Nenhum aviso no momento.</p>';
+            } else {
+                // Pega o aviso mais recente (supondo que o último do array é o mais novo, ou vice-versa)
+                const ultimoAviso = avisosGlobais[0];
+                const icone = ultimoAviso.tipo === 'escala' ? '📅' : '📢';
+                preview.innerHTML = `<p style="font-size: 0.95rem; font-weight: 600; color: #222;">${icone} ${ultimoAviso.titulo}</p>
+                                     <p style="font-size: 0.85rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ultimoAviso.mensagem}</p>`;
+            }
+        }
+
+        function abrirModalAvisos() {
+            const container = document.getElementById('lista-avisos-modal');
+            container.innerHTML = avisosGlobais.length === 0 ? '<div class="vazio">Nenhuma notificação recente.</div>' : '';
+            
+            avisosGlobais.forEach(a => {
+                const classeCor = a.tipo === 'escala' ? 'aviso-escala' : 'aviso-geral';
+                const icone = a.tipo === 'escala' ? '📅' : '📢';
+                container.innerHTML += `
+                    <div class="item-lista ${classeCor}">
+                        <div class="item-titulo">${icone} ${a.titulo}</div>
+                        <span class="item-data">${a.data}</span>
+                        <div class="item-texto">${a.mensagem}</div>
+                    </div>`;
+            });
+            document.getElementById('modal-avisos').style.display = 'flex';
         }
     </script>
 </body>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Frequência - PARVULI</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #8b0000;
+            --card-bg: #ffffff;
+            --text-dark: #333;
+            --green: #28a745;
+            --warning: #ffc107;
+            --red: #dc3545;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); padding: 15px; padding-bottom: 90px; color: var(--text-dark); }
+
+        .header-nav { display: flex; align-items: center; margin-bottom: 15px; justify-content: space-between; }
+        .btn-voltar { text-decoration: none; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: var(--card-bg); padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; border: none; }
+
+        /* ====== TELA INICIAL (Resumo e Histórico) ====== */
+        #tela-inicial { display: block; }
+        
+        /* Abas (Tabs) */
+        .tabs-container { display: flex; background: white; border-radius: 10px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: bold; font-size: 0.95rem; background: transparent; border: none; color: #777; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #fffafb; }
+
+        /* Lista de Resumo de Membros */
+        .resumo-card { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .resumo-card .nome { font-weight: bold; font-size: 1.05rem; }
+        .badges-freq { display: flex; gap: 5px; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; color: white; }
+        .badge-p { background-color: var(--green); }
+        .badge-j { background-color: var(--warning); color: #333; }
+        .badge-f { background-color: var(--red); }
+
+        /* Histórico de Reuniões */
+        .historico-card { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); cursor: pointer; }
+        .historico-card .info-reuniao strong { display: block; font-size: 1.05rem; color: #222; margin-bottom: 4px; }
+        .historico-card .info-reuniao span { font-size: 0.8rem; color: #666; }
+        .btn-editar-icon { font-size: 1.2rem; color: var(--primary); }
+
+        /* Botão Flutuante (Nova Chamada) */
+        .btn-flutuante { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4); cursor: pointer; z-index: 100; display: flex; align-items: center; gap: 8px; }
+
+        /* ====== TELA DE CHAMADA (Nova ou Edição) ====== */
+        #tela-chamada { display: none; }
+
+        .painel-reuniao { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .painel-reuniao h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        
+        .grupo-input { margin-bottom: 12px; }
+        .grupo-input label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        .grupo-input input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; outline: none; }
+        
+        .resumo-stats { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+        .stat-box { flex: 1; background: white; padding: 10px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 4px solid #ccc; }
+        .stat-box.box-p { border-color: var(--green); }
+        .stat-box.box-j { border-color: var(--warning); }
+        .stat-box.box-f { border-color: var(--red); }
+        .stat-box span { display: block; font-size: 0.8rem; font-weight: bold; color: #666; }
+        .stat-box strong { display: block; font-size: 1.5rem; color: #333; margin-top: 5px; }
+
+        .membro-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .membro-nome { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: #222; }
+        
+        .controles-freq { display: flex; gap: 8px; }
+        .btn-status { flex: 1; padding: 10px 5px; border: 2px solid #ddd; border-radius: 6px; background: #f8f9fa; font-weight: bold; font-size: 0.85rem; cursor: pointer; transition: 0.2s; text-align: center; color: #555; user-select: none; }
+        .btn-status.ativo-p { background: var(--green); border-color: var(--green); color: white; }
+        .btn-status.ativo-j { background: var(--warning); border-color: var(--warning); color: #333; }
+        .btn-status.ativo-f { background: var(--red); border-color: var(--red); color: white; }
+
+        .btn-salvar { display: block; width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <!-- VISÃO 1: PAINEL INICIAL (RESUMO E HISTÓRICO) -->
+    <div id="tela-inicial">
+        <div class="header-nav">
+            <a href="../dashboard/dashboard.html" class="btn-voltar">← Voltar à Tela Inicial</a>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" id="btn-tab-resumo" onclick="mudarAba('resumo')">Visão Geral</button>
+            <button class="tab-btn" id="btn-tab-historico" onclick="mudarAba('historico')">Histórico</button>
+        </div>
+
+        <!-- Aba Resumo -->
+        <main id="tab-resumo">
+            <h3 style="margin-bottom: 10px; font-size: 1rem; color: #555;">Frequência Acumulada</h3>
+            <div id="lista-resumo"></div>
+        </main>
+
+        <!-- Aba Histórico -->
+        <main id="tab-historico" style="display: none;">
+            <h3 style="margin-bottom: 10px; font-size: 1rem; color: #555;">Reuniões Anteriores</h3>
+            <div id="lista-reunioes"></div>
+        </main>
+
+        <button class="btn-flutuante" onclick="abrirTelaChamada(null)">➕ Nova Chamada</button>
+    </div>
+
+    <!-- VISÃO 2: TELA DE CHAMADA (CRIAR/EDITAR) -->
+    <div id="tela-chamada">
+        <div class="header-nav">
+            <button class="btn-voltar" onclick="fecharTelaChamada()">← Cancelar</button>
+        </div>
+
+        <main>
+            <div class="painel-reuniao">
+                <h2 id="titulo-tela-chamada">Nova Chamada</h2>
+                <div class="grupo-input">
+                    <label for="tema-reuniao">Tema / Tipo de Reunião</label>
+                    <input type="text" id="tema-reuniao" placeholder="Ex: Reunião Geral, Ensaio...">
+                </div>
+                <div class="grupo-input">
+                    <label for="data-reuniao">Data</label>
+                    <input type="date" id="data-reuniao">
+                </div>
+            </div>
+
+            <div class="resumo-stats">
+                <div class="stat-box box-p"><span>Presentes</span><strong id="count-p">0</strong></div>
+                <div class="stat-box box-j"><span>Justificados</span><strong id="count-j">0</strong></div>
+                <div class="stat-box box-f"><span>Faltas</span><strong id="count-f">0</strong></div>
+            </div>
+
+            <div id="lista-chamada"></div>
+
+            <button class="btn-salvar" onclick="salvarChamada()">💾 Salvar Frequência</button>
+        </main>
+    </div>
+
+    <script>
+        // --- BANCO DE DADOS SIMULADO ---
+        const membrosAtivos = [
+            { id: 1, nome: "Túlio Rocha" },
+            { id: 2, nome: "Pedro Alves" },
+            { id: 3, nome: "Gigi" },
+            { id: 4, nome: "João Pedro" }
+        ];
+
+        // Simulando reuniões que já aconteceram
+        let reunioesRealizadas = [
+            { id: 101, tema: "Reunião de Alinhamento", data: "2026-10-01", frequencias: { 1: 'P', 2: 'P', 3: 'J', 4: 'F' } },
+            { id: 102, tema: "Ensaio Geral", data: "2026-10-08", frequencias: { 1: 'P', 2: 'F', 3: 'P', 4: 'P' } }
+        ];
+
+        // Variáveis de Controle da Chamada Atual
+        let registroChamadaAtual = {}; 
+        let idReuniaoEditando = null;
+
+        // --- INICIALIZAÇÃO ---
+        window.onload = () => {
+            renderizarVisaoGeral();
+            renderizarHistorico();
+        };
+
+        // --- LÓGICA DAS ABAS (TELA INICIAL) ---
+        function mudarAba(aba) {
+            document.getElementById('btn-tab-resumo').classList.remove('active');
+            document.getElementById('btn-tab-historico').classList.remove('active');
+            document.getElementById('tab-resumo').style.display = 'none';
+            document.getElementById('tab-historico').style.display = 'none';
+
+            if (aba === 'resumo') {
+                document.getElementById('btn-tab-resumo').classList.add('active');
+                document.getElementById('tab-resumo').style.display = 'block';
+                renderizarVisaoGeral();
+            } else {
+                document.getElementById('btn-tab-historico').classList.add('active');
+                document.getElementById('tab-historico').style.display = 'block';
+                renderizarHistorico();
+            }
+        }
+
+        // Calcula os totais P, J e F de cada membro varrendo as reuniões
+        function renderizarVisaoGeral() {
+            const container = document.getElementById('lista-resumo');
+            container.innerHTML = '';
+
+            membrosAtivos.forEach(membro => {
+                let p = 0, j = 0, f = 0;
+                reunioesRealizadas.forEach(reuniao => {
+                    let status = reuniao.frequencias[membro.id];
+                    if (status === 'P') p++;
+                    if (status === 'J') j++;
+                    if (status === 'F') f++;
+                });
+
+                container.innerHTML += `
+                    <div class="resumo-card">
+                        <div class="nome">${membro.nome}</div>
+                        <div class="badges-freq">
+                            <span class="badge badge-p" title="Presentes">P: ${p}</span>
+                            <span class="badge badge-j" title="Justificados">J: ${j}</span>
+                            <span class="badge badge-f" title="Faltas">F: ${f}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarHistorico() {
+            const container = document.getElementById('lista-reunioes');
+            container.innerHTML = '';
+
+            if (reunioesRealizadas.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#888;">Nenhuma reunião registrada.</p>';
+                return;
+            }
+
+            // Exibe da mais recente para a mais antiga
+            [...reunioesRealizadas].reverse().forEach(reuniao => {
+                // Formata data de AAAA-MM-DD para DD/MM/AAAA
+                const partesData = reuniao.data.split('-');
+                const dataFormatada = partesData.length === 3 ? `${partesData[2]}/${partesData[1]}/${partesData[0]}` : reuniao.data;
+
+                container.innerHTML += `
+                    <div class="historico-card" onclick="abrirTelaChamada(${reuniao.id})">
+                        <div class="info-reuniao">
+                            <strong>${reuniao.tema}</strong>
+                            <span>Realizada em: ${dataFormatada}</span>
+                        </div>
+                        <div class="btn-editar-icon">✏️</div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- LÓGICA DA TELA DE CHAMADA ---
+        function abrirTelaChamada(idReuniao) {
+            document.getElementById('tela-inicial').style.display = 'none';
+            document.getElementById('tela-chamada').style.display = 'block';
+
+            const container = document.getElementById('lista-chamada');
+            container.innerHTML = '';
+            registroChamadaAtual = {};
+
+            if (idReuniao === null) {
+                // MODO: NOVA CHAMADA
+                idReuniaoEditando = null;
+                document.getElementById('titulo-tela-chamada').innerText = "Nova Chamada";
+                document.getElementById('tema-reuniao').value = "";
+                document.getElementById('data-reuniao').valueAsDate = new Date();
+
+                // Gera a lista vazia
+                membrosAtivos.forEach(membro => {
+                    registroChamadaAtual[membro.id] = null;
+                    container.innerHTML += criarCardMembro(membro.id, membro.nome);
+                });
+            } else {
+                // MODO: EDITAR CHAMADA EXISTENTE
+                idReuniaoEditando = idReuniao;
+                const reuniao = reunioesRealizadas.find(r => r.id === idReuniao);
+                
+                document.getElementById('titulo-tela-chamada').innerText = "Editar Chamada";
+                document.getElementById('tema-reuniao').value = reuniao.tema;
+                document.getElementById('data-reuniao').value = reuniao.data;
+
+                // Carrega os status salvos
+                membrosAtivos.forEach(membro => {
+                    registroChamadaAtual[membro.id] = reuniao.frequencias[membro.id] || null;
+                    container.innerHTML += criarCardMembro(membro.id, membro.nome);
+                    // Pinta o botão correto
+                    if (registroChamadaAtual[membro.id]) {
+                        marcarInterface(membro.id, registroChamadaAtual[membro.id]);
+                    }
+                });
+            }
+            atualizarContadoresChamada();
+        }
+
+        function fecharTelaChamada() {
+            document.getElementById('tela-chamada').style.display = 'none';
+            document.getElementById('tela-inicial').style.display = 'block';
+            
+            // Recarrega as abas por garantia
+            renderizarVisaoGeral();
+            renderizarHistorico();
+        }
+
+        function criarCardMembro(id, nome) {
+            return `
+                <div class="membro-card">
+                    <div class="membro-nome">${nome}</div>
+                    <div class="controles-freq">
+                        <div class="btn-status" id="btn-p-${id}" onclick="registrarFrequencia(${id}, 'P')">✔️ Presente</div>
+                        <div class="btn-status" id="btn-j-${id}" onclick="registrarFrequencia(${id}, 'J')">⚠️ Justificou</div>
+                        <div class="btn-status" id="btn-f-${id}" onclick="registrarFrequencia(${id}, 'F')">❌ Falta</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function registrarFrequencia(membroId, status) {
+            registroChamadaAtual[membroId] = status;
+            marcarInterface(membroId, status);
+            atualizarContadoresChamada();
+        }
+
+        function marcarInterface(membroId, status) {
+            document.getElementById(`btn-p-${membroId}`).classList.remove('ativo-p');
+            document.getElementById(`btn-j-${membroId}`).classList.remove('ativo-j');
+            document.getElementById(`btn-f-${membroId}`).classList.remove('ativo-f');
+
+            if (status === 'P') document.getElementById(`btn-p-${membroId}`).classList.add('ativo-p');
+            if (status === 'J') document.getElementById(`btn-j-${membroId}`).classList.add('ativo-j');
+            if (status === 'F') document.getElementById(`btn-f-${membroId}`).classList.add('ativo-f');
+        }
+
+        function atualizarContadoresChamada() {
+            let p = 0, j = 0, f = 0;
+            Object.values(registroChamadaAtual).forEach(s => {
+                if (s === 'P') p++;
+                if (s === 'J') j++;
+                if (s === 'F') f++;
+            });
+            document.getElementById('count-p').innerText = p;
+            document.getElementById('count-j').innerText = j;
+            document.getElementById('count-f').innerText = f;
+        }
+
+        function salvarChamada() {
+            const tema = document.getElementById('tema-reuniao').value.trim();
+            const data = document.getElementById('data-reuniao').value;
+
+            if (!tema) { alert("Preencha o Tema da Reunião."); return; }
+
+            const pendentes = Object.values(registroChamadaAtual).filter(s => s === null).length;
+            if (pendentes > 0) {
+                if (!confirm(`Existem ${pendentes} membro(s) sem marcação. Deseja salvar assim mesmo?`)) return;
+            }
+
+            if (idReuniaoEditando === null) {
+                // Salvar Nova
+                const novaReuniao = {
+                    id: Date.now(),
+                    tema: tema,
+                    data: data,
+                    frequencias: { ...registroChamadaAtual }
+                };
+                reunioesRealizadas.push(novaReuniao);
+            } else {
+                // Atualizar Existente
+                const index = reunioesRealizadas.findIndex(r => r.id === idReuniaoEditando);
+                reunioesRealizadas[index].tema = tema;
+                reunioesRealizadas[index].data = data;
+                reunioesRealizadas[index].frequencias = { ...registroChamadaAtual };
+            }
+
+            alert("Frequência salva com sucesso!");
+            fecharTelaChamada(); // Volta para o painel inicial e recarrega os dados
+        }
+    </script>
+</body>
+</html>

@@ -43,6 +43,8 @@
         .historico-card .info-reuniao strong { display: block; font-size: 1.05rem; color: #222; margin-bottom: 4px; }
         .historico-card .info-reuniao span { font-size: 0.8rem; color: #666; }
         .btn-editar-icon { font-size: 1.2rem; color: var(--primary); }
+        .acoes-reuniao { display: flex; align-items: center; gap: 10px; }
+        .btn-excluir { border: 0; background: #ffebee; color: var(--red); border-radius: 6px; padding: 7px 9px; cursor: pointer; font-weight: bold; }
 
         /* Botão Flutuante (Nova Chamada) */
         .btn-flutuante { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4); cursor: pointer; z-index: 100; display: flex; align-items: center; gap: 8px; }
@@ -227,7 +229,7 @@
                             <strong>${reuniao.tema}</strong>
                             <span>Realizada em: ${dataFormatada}</span>
                         </div>
-                        <div class="btn-editar-icon">✏️</div>
+                        <div class="acoes-reuniao"><div class="btn-editar-icon">✏️</div><button class="btn-excluir" onclick="event.stopPropagation(); excluirChamada(${reuniao.id})" aria-label="Excluir frequência">Excluir</button></div>
                     </div>
                 `;
             });
@@ -356,6 +358,15 @@
 
             alert("Frequência salva com sucesso!");
             fecharTelaChamada(); // Volta para o painel inicial e recarrega os dados
+        }
+
+        function excluirChamada(idReuniao) {
+            const reuniao = reunioesRealizadas.find(r => r.id === idReuniao);
+            if (!reuniao || !confirm(`Excluir a frequência de "${reuniao.tema}"? Essa ação não pode ser desfeita.`)) return;
+            reunioesRealizadas = reunioesRealizadas.filter(r => r.id !== idReuniao);
+            renderizarHistorico();
+            renderizarVisaoGeral();
+            alert('Frequência excluída com sucesso.');
         }
     </script>
 </body>
